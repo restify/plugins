@@ -2,29 +2,23 @@
 
 'use strict';
 
+// core requires
 var fs = require('fs');
 var http = require('http');
 var net = require('net');
 var path = require('path');
 
+// external requires
+var assert = require('chai').assert;
 var bunyan = require('bunyan');
+var restify = require('restify');
 var restifyClients = require('restify-clients');
 
-var restify = require('../lib');
+// local files
+var plugins = require('../lib');
+var helper = require('./lib/helper');
 
-
-if (require.cache[__dirname + '/lib/helper.js']) {
-    delete require.cache[__dirname + '/lib/helper.js'];
-}
-var helper = require('./lib/helper.js');
-
-
-///--- Globals
-
-var after = helper.after;
-var before = helper.before;
-var test = helper.test;
-
+// local globals
 var PORT = process.env.UNIT_TEST_PORT || 0;
 var CLIENT;
 var SERVER;
@@ -32,233 +26,75 @@ var SERVER;
 var FILES_TO_DELETE = [];
 var DIRS_TO_DELETE = [];
 
-///--- Tests
 
-before(function (callback) {
-    try {
-        SERVER = restify.createServer({
-            dtrace: helper.dtrace,
-            log: helper.getLog('server')
-        });
+describe('all other plugins', function () {
 
-        SERVER.use(restify.acceptParser(SERVER.acceptable));
-        SERVER.use(restify.authorizationParser());
-        SERVER.use(restify.dateParser());
-        SERVER.use(restify.queryParser());
-
-        SERVER.get('/foo/:id', function respond(req, res, next) {
-            res.send();
-            next();
-        });
-
-        SERVER.listen(PORT, '127.0.0.1', function () {
-            PORT = SERVER.address().port;
-            CLIENT = restifyClients.createJsonClient({
-                url: 'http://127.0.0.1:' + PORT,
+    before(function (done) {
+        try {
+            SERVER = restify.createServer({
                 dtrace: helper.dtrace,
-                retry: false,
-                agent: false
+                log: helper.getLog('server')
             });
 
-            process.nextTick(callback);
-        });
-    } catch (e) {
-        console.error(e.stack);
-        process.exit(1);
-    }
-});
+            SERVER.use(restify.acceptParser(SERVER.acceptable));
+            SERVER.use(restify.authorizationParser());
+            SERVER.use(restify.dateParser());
+            SERVER.use(restify.queryParser());
+
+            SERVER.get('/foo/:id', function respond(req, res, next) {
+                res.send();
+                next();
+            });
+
+            SERVER.listen(PORT, '127.0.0.1', function () {
+                PORT = SERVER.address().port;
+                CLIENT = restifyClients.createJsonClient({
+                    url: 'http://127.0.0.1:' + PORT,
+                    dtrace: helper.dtrace,
+                    retry: false,
+                    agent: false
+                });
+
+                done();
+            });
+        } catch (e) {
+            console.error(e.stack);
+            process.exit(1);
+        }
+    });
 
 
-after(function (callback) {
-    var i;
+    after(function (done) {
+        var i;
 
-    try {
-        for (i = 0; i < FILES_TO_DELETE.length; ++i) {
-            try {
-                fs.unlinkSync(FILES_TO_DELETE[i]);
+        try {
+            for (i = 0; i < FILES_TO_DELETE.length; ++i) {
+                try {
+                    fs.unlinkSync(FILES_TO_DELETE[i]);
+                }
+                catch (err) { /* normal */
+                }
             }
-            catch (err) { /* normal */
+
+            for (i = 0; i < DIRS_TO_DELETE.length; ++i) {
+                try {
+                    fs.rmdirSync(DIRS_TO_DELETE[i]);
+                }
+                catch (err) { /* normal */
+                }
             }
+            SERVER.close(done);
+        } catch (e) {
+            console.error(e.stack);
+            process.exit(1);
         }
+    });
 
-        for (i = 0; i < DIRS_TO_DELETE.length; ++i) {
-            try {
-                fs.rmdirSync(DIRS_TO_DELETE[i]);
-            }
-            catch (err) { /* normal */
-            }
-        }
-        SERVER.close(callback);
-    } catch (e) {
-        console.error(e.stack);
-        process.exit(1);
-    }
+
 });
 
+/*
 
-test('accept ok', function (t) {
-    CLIENT.get('/foo/bar', function (err, _, res) {
-        t.ifError(err);
-        t.equal(res.statusCode, 200);
-        t.end();
-    });
-});
-
-
-test('406', function (t) {
-    var opts = {
-        path: '/foo/bar',
-        headers: {
-            accept: 'foo/bar'
-        }
-    };
-    CLIENT.get(opts, function (err, _, res) {
-        t.equal(res.statusCode, 406);
-        t.end();
-    });
-});
-
-
-test('authorization basic ok', function (t) {
-    var authz = 'Basic ' + new Buffer('user:secret').toString('base64');
-    var opts = {
-        path: '/foo/bar',
-        headers: {
-            authorization: authz
-        }
-    };
-    CLIENT.get(opts, function (err, _, res) {
-        t.equal(res.statusCode, 200);
-        t.end();
-    });
-});
-
-
-test('authorization basic invalid', function (t) {
-    var opts = {
-        path: '/foo/bar',
-        headers: {
-            authorization: 'Basic '
-        }
-    };
-    CLIENT.get(opts, function (err, _, res) {
-        t.equal(res.statusCode, 400);
-        t.end();
-    });
-});
-
-
-test('query ok', function (t) {
-    SERVER.get('/query/:id', function (req, res, next) {
-        t.equal(req.params.id, 'foo');
-        t.equal(req.params.name, 'markc');
-        t.equal(req.params.name, 'markc');
-        res.send();
-        next();
-    });
-
-    CLIENT.get('/query/foo?id=bar&name=markc', function (err, _, res) {
-        t.ifError(err);
-        t.equal(res.statusCode, 200);
-        t.end();
-    });
-});
-
-
-test('GH-124 query ok no query string', function (t) {
-    SERVER.get('/query/:id', function (req, res, next) {
-        t.equal(req.getQuery(), '');
-        res.send();
-        next();
-    });
-
-    CLIENT.get('/query/foo', function (err, _, res) {
-        t.ifError(err);
-        t.equal(res.statusCode, 200);
-        t.end();
-    });
-});
-
-
-test('query object', function (t) {
-    SERVER.get('/query/:id', function (req, res, next) {
-        t.equal(req.params.id, 'foo');
-        t.ok(req.params.name);
-        t.equal(req.params.name.first, 'mark');
-        t.equal(req.query.name.last, 'cavage');
-        res.send();
-        next();
-    });
-
-    var p = '/query/foo?name[first]=mark&name[last]=cavage';
-    CLIENT.get(p, function (err, _, res) {
-        t.ifError(err);
-        t.equal(res.statusCode, 200);
-        t.end();
-    });
-});
-
-
-test('body url-encoded ok', function (t) {
-    SERVER.post('/bodyurl/:id',
-        restify.bodyParser(),
-        function (req, res, next) {
-            t.equal(req.params.id, 'foo');
-            t.equal(req.params.name, 'markc');
-            t.equal(req.params.phone, '(206) 555-1212');
-            res.send();
-            next();
-        });
-
-    var opts = {
-        hostname: '127.0.0.1',
-        port: PORT,
-        path: '/bodyurl/foo?name=markc',
-        agent: false,
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
-    };
-    var client = http.request(opts, function (res) {
-        t.equal(res.statusCode, 200);
-        t.end();
-    });
-
-    client.write('phone=(206)%20555-1212&name=somethingelse');
-    client.end();
-});
-
-
-test('body url-encoded ok (no params)', function (t) {
-    SERVER.post('/bodyurl2/:id',
-        restify.bodyParser({ mapParams: false }),
-        function (req, res, next) {
-            t.equal(req.params.id, 'foo');
-            t.equal(req.params.name, 'markc');
-            t.notOk(req.params.phone);
-            t.equal(req.body.phone, '(206) 555-1212');
-            res.send();
-            next();
-        });
-
-    var opts = {
-        hostname: '127.0.0.1',
-        port: PORT,
-        path: '/bodyurl2/foo?name=markc',
-        agent: false,
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
-    };
-    var client = http.request(opts, function (res) {
-        t.equal(res.statusCode, 200);
-        t.end();
-    });
-    client.write('phone=(206)%20555-1212&name=somethingelse');
-    client.end();
-});
 
 test('body multipart ok', function (t) {
     SERVER.post('/multipart/:id',
@@ -1397,3 +1233,5 @@ function serveStaticTest(t, testDefault, tmpDir, regex, staticFile) {
     });
 
 }
+
+*/
