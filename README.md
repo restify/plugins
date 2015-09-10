@@ -33,10 +33,6 @@ This module includes the following header parser plugins:
 * `authorizationParser(options)` - Authorization header
   * `options` {Object} options object passed to http-signature module
 * `conditionalRequest()` - Conditional headers (If-\*)
-* `cors(options)` - CORS headers
-  * `options.origins` {Array} array of origins servers
-  * `options.credentials` {Boolean} if true, sets `Access-Control-Allow-Credentials` on response
-  * `options.headers` {Array} array of headers to set on `Access-Control-Expose-Headers`
 * `fullResponse()` - handles disappeared CORS headers
 
 This module includes the following data parsing plugins:
