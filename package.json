@@ -88,8 +88,8 @@
     "mkdirp": "^0.5.1",
     "mocha": "^2.3.2",
     "nsp": "^1.1.0",
-    "restify": "^4.0.0",
-    "restify-clients": "^1.0.0",
+    "restify": "^4.0.2",
+    "restify-clients": "^1.1.0",
     "rimraf": "^2.4.3"
   },
   "dependencies": {
