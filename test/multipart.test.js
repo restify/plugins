@@ -259,7 +259,8 @@ describe('multipart parser', function () {
         client.end();
     });
 
-    it('GH-694 pass hash option through to Formidable', function (done) {
+    it('restify-GH-694 pass hash option through to Formidable',
+    function (done) {
         var content = 'Hello World!';
         var hash = '2ef7bde608ce5404e97d5f042f95f89f1c232871';
         SERVER.post('/multipart',

@@ -168,7 +168,7 @@ describe('audit logger', function () {
     });
 
 
-    it('GH-812 audit logger has query params string', function (done) {
+    it('restify-GH-812 audit logger has query params string', function (done) {
 
         // Dirty hack to capture the log record using a ring buffer.
         var ringbuffer = new bunyan.RingBuffer({ limit: 1 });
@@ -204,7 +204,7 @@ describe('audit logger', function () {
     });
 
 
-    it('GH-812 audit logger has query params obj', function (done) {
+    it('restify-GH-812 audit logger has query params obj', function (done) {
 
         // Dirty hack to capture the log record using a ring buffer.
         var ringbuffer = new bunyan.RingBuffer({ limit: 1 });

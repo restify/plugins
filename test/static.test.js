@@ -150,12 +150,13 @@ describe('static resource plugin', function () {
     });
 
 
-    it('GH-379 static serves file with parentheses in path', function (done) {
+    it('restify-GH-379 static serves file with parentheses in path',
+    function (done) {
         serveStaticTest(done, false, '.(tmp)');
     });
 
 
-    it('GH-719 serve a specific static file', function (done) {
+    it('restify-GH-719 serve a specific static file', function (done) {
         // serve the same default file .tmp/public/index.json
         // but get it from opts.file
         serveStaticTest(done, false, '.tmp', null, true);

@@ -41,7 +41,7 @@ describe('query parser', function () {
     });
 
 
-    it('GH-124 should return empty query', function (done) {
+    it('restify-GH-124 should return empty query', function (done) {
         SERVER.use(plugins.queryParser());
 
         SERVER.get('/query/:id', function (req, res, next) {
@@ -179,7 +179,7 @@ describe('query parser', function () {
         });
     });
 
-    it('GH-59 Query params with / result in a 404', function (done) {
+    it('restify-GH-59 Query params with / result in a 404', function (done) {
         SERVER.use(plugins.queryParser());
 
         SERVER.get('/', function tester(req, res, next) {
@@ -195,7 +195,7 @@ describe('query parser', function () {
         });
     });
 
-    it('GH-323: <url>/<path>/?<queryString> broken', function (done) {
+    it('restify-GH-323: <url>/<path>/?<queryString> broken', function (done) {
         SERVER.pre(plugins.pre.sanitizePath());
         SERVER.use(plugins.queryParser({
             mapParams: true

@@ -215,7 +215,8 @@ describe('JSON body parser', function () {
         });
     });
 
-    it('GH-318 get request with body (default)', function (done) {
+    it('restify-GH-318 get request with body (default)',
+    function (done) {
         SERVER.use(plugins.bodyParser({
             mapParams: true
         }));
@@ -244,7 +245,8 @@ describe('JSON body parser', function () {
         });
     });
 
-    it('GH-318 get request with body (requestBodyOnGet=true)', function (done) {
+    it('restify-GH-318 get request with body (requestBodyOnGet=true)',
+    function (done) {
         SERVER.use(plugins.bodyParser({
             mapParams: true,
             requestBodyOnGet: true
@@ -275,7 +277,7 @@ describe('JSON body parser', function () {
         });
     });
 
-    it('GH-111 JSON Parser not right for arrays', function (done) {
+    it('restify-GH-111 JSON Parser not right for arrays', function (done) {
         SERVER.use(plugins.bodyParser({
             mapParams: true
         }));
@@ -296,7 +298,7 @@ describe('JSON body parser', function () {
         });
     });
 
-    it('GH-279 more JSON Arrays', function (done) {
+    it('restify-GH-279 more JSON Arrays', function (done) {
         SERVER.use(plugins.jsonBodyParser({
             mapParams: true
         }));
@@ -328,7 +330,7 @@ describe('JSON body parser', function () {
         });
     });
 
-    it('GH-774 utf8 corruption in body parser', function (done) {
+    it('restify-GH-774 utf8 corruption in body parser', function (done) {
         var slen = 100000;
         SERVER.use(plugins.bodyParser());
         SERVER.post('/utf8', function (req, res, next) {
@@ -353,7 +355,7 @@ describe('JSON body parser', function () {
     });
 
 
-    it('GH-149 limit request body size', function (done) {
+    it('restify-GH-149 limit request body size', function (done) {
         SERVER.use(plugins.bodyParser({maxBodySize: 1024}));
 
         SERVER.post('/', function (req, res, next) {
@@ -383,7 +385,7 @@ describe('JSON body parser', function () {
     });
 
 
-    it('GH-149 limit request body size (json)', function (done) {
+    it('restify-GH-149 limit request body size (json)', function (done) {
         SERVER.use(plugins.bodyParser({maxBodySize: 1024}));
 
         SERVER.post('/', function (req, res, next) {
