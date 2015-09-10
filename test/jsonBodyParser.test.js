@@ -2,6 +2,7 @@
 
 // core requires
 var net = require('net');
+var http = require('http');
 
 // external requires
 var assert = require('chai').assert;
@@ -32,8 +33,7 @@ describe('JSON body parser', function () {
             CLIENT = restifyClients.createJsonClient({
                 url: 'http://127.0.0.1:' + PORT,
                 dtrace: helper.dtrace,
-                retry: false,
-                agent: false
+                retry: false
             });
             STRING_CLIENT = restifyClients.createStringClient({
                 url: 'http://127.0.0.1:' + PORT,
@@ -49,9 +49,9 @@ describe('JSON body parser', function () {
     });
 
     afterEach(function (done) {
-        SERVER.close(done);
         CLIENT.close();
         STRING_CLIENT.close();
+        SERVER.close(done);
     });
 
     it('should parse null JSON body', function (done) {
@@ -351,6 +351,67 @@ describe('JSON body parser', function () {
             done();
         });
     });
+
+
+    it('GH-149 limit request body size', function (done) {
+        SERVER.use(plugins.bodyParser({maxBodySize: 1024}));
+
+        SERVER.post('/', function (req, res, next) {
+            res.send(200, {length: req.body.length});
+            next();
+        });
+
+        var opts = {
+            hostname: '127.0.0.1',
+            port: PORT,
+            path: '/',
+            method: 'POST',
+            agent: false,
+            headers: {
+                accept: 'application/json',
+                'content-type': 'application/x-www-form-urlencoded',
+                'transfer-encoding': 'chunked'
+            }
+        };
+        var client = http.request(opts, function (res) {
+            assert.equal(res.statusCode, 413);
+            res.once('end', done);
+            res.resume();
+        });
+        client.write(new Array(1028).join('x'));
+        client.end();
+    });
+
+
+    it('GH-149 limit request body size (json)', function (done) {
+        SERVER.use(plugins.bodyParser({maxBodySize: 1024}));
+
+        SERVER.post('/', function (req, res, next) {
+            res.send(200, {length: req.body.length});
+            next();
+        });
+
+        var opts = {
+            hostname: '127.0.0.1',
+            port: PORT,
+            path: '/',
+            method: 'POST',
+            agent: false,
+            headers: {
+                accept: 'application/json',
+                'content-type': 'application/json',
+                'transfer-encoding': 'chunked'
+            }
+        };
+        var client = http.request(opts, function (res) {
+            assert.equal(res.statusCode, 413);
+            res.once('end', done);
+            res.resume();
+        });
+        client.write('{"a":[' + new Array(512).join('1,') + '0]}');
+        client.end();
+    });
+
 });
 
 

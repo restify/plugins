@@ -60,8 +60,7 @@ describe('throttle plugin', function () {
             CLIENT = restifyClients.createJsonClient({
                 url: 'http://127.0.0.1:' + PORT,
                 dtrace: helper.dtrace,
-                retry: false,
-                agent: false
+                retry: false
             });
 
             done();
@@ -69,9 +68,8 @@ describe('throttle plugin', function () {
     });
 
     after(function teardown(done) {
-        SERVER.close(function () {
-            done();
-        });
+        CLIENT.close();
+        SERVER.close(done);
     });
 
 

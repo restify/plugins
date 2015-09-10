@@ -27,8 +27,7 @@ describe('accept parser', function () {
             CLIENT = restifyClients.createJsonClient({
                 url: 'http://127.0.0.1:' + PORT,
                 dtrace: helper.dtrace,
-                retry: false,
-                agent: false
+                retry: false
             });
 
             done();
@@ -36,6 +35,7 @@ describe('accept parser', function () {
     });
 
     afterEach(function (done) {
+        CLIENT.close();
         SERVER.close(done);
     });
 

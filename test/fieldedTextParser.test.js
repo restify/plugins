@@ -51,14 +51,14 @@ describe('fielded text parser', function () {
             CLIENT = restifyClients.createClient({
                 url: 'http://127.0.0.1:' + PORT,
                 dtrace: helper.dtrace,
-                retry: false,
-                agent: false
+                retry: false
             });
             done();
         });
     });
 
     after(function (done) {
+        CLIENT.close();
         SERVER.close(done);
     });
 

@@ -22,7 +22,8 @@ describe('all other plugins', function () {
     beforeEach(function (done) {
         SERVER = restify.createServer({
             dtrace: helper.dtrace,
-            log: helper.getLog('server')
+            log: helper.getLog('server'),
+            version: ['2.0.0', '0.5.4', '1.4.3']
         });
 
         SERVER.listen(PORT, '127.0.0.1', function () {
@@ -30,8 +31,7 @@ describe('all other plugins', function () {
             CLIENT = restifyClients.createJsonClient({
                 url: 'http://127.0.0.1:' + PORT,
                 dtrace: helper.dtrace,
-                retry: false,
-                agent: false
+                retry: false
             });
 
             done();
@@ -40,6 +40,7 @@ describe('all other plugins', function () {
 
 
     afterEach(function (done) {
+        CLIENT.close();
         SERVER.close(done);
     });
 
@@ -100,5 +101,36 @@ describe('all other plugins', function () {
 
     });
 
+    describe('full response', function () {
+
+        it('full response', function (done) {
+            SERVER.use(plugins.fullResponse());
+            SERVER.get('/bar/:id', function tester2(req, res, next) {
+                assert.ok(req.params);
+                assert.equal(req.params.id, 'bar');
+                res.send();
+                next();
+            });
+
+            CLIENT.get('/bar/bar', function (err, _, res) {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                var headers = res.headers;
+                assert.ok(headers, 'headers ok');
+                assert.ok(headers['access-control-allow-origin']);
+                assert.ok(headers['access-control-allow-headers']);
+                assert.ok(headers['access-control-expose-headers']);
+                assert.ok(headers['access-control-allow-methods']);
+                assert.ok(headers.date);
+                assert.ok(headers['request-id']);
+                assert.ok(headers['response-time'] >= 0);
+                assert.equal(headers.server, 'restify');
+                assert.equal(headers.connection, 'Keep-Alive');
+                assert.equal(headers['api-version'], '2.0.0');
+                done();
+            });
+        });
+
+    });
 });
 

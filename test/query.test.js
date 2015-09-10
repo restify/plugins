@@ -28,8 +28,7 @@ describe('query parser', function () {
             CLIENT = restifyClients.createJsonClient({
                 url: 'http://127.0.0.1:' + PORT,
                 dtrace: helper.dtrace,
-                retry: false,
-                agent: false
+                retry: false
             });
 
             done();
@@ -37,6 +36,7 @@ describe('query parser', function () {
     });
 
     afterEach(function (done) {
+        CLIENT.close();
         SERVER.close(done);
     });
 
@@ -178,6 +178,59 @@ describe('query parser', function () {
             done();
         });
     });
+
+    it('GH-59 Query params with / result in a 404', function (done) {
+        SERVER.use(plugins.queryParser());
+
+        SERVER.get('/', function tester(req, res, next) {
+            res.send('hello world');
+            next();
+        });
+
+        CLIENT.get('/?foo=bar/foo', function (err, _, res, obj) {
+            assert.ifError(err);
+            assert.equal(res.statusCode, 200);
+            assert.equal(obj, 'hello world');
+            done();
+        });
+    });
+
+    it('GH-323: <url>/<path>/?<queryString> broken', function (done) {
+        SERVER.pre(plugins.pre.sanitizePath());
+        SERVER.use(plugins.queryParser({
+            mapParams: true
+        }));
+        SERVER.get('/hello/:name', function (req, res, next) {
+            res.send(req.params);
+        });
+
+        SERVER.listen(8080, function () {
+            CLIENT.get('/hello/foo/?bar=baz', function (err, _, __, obj) {
+                assert.ifError(err);
+                assert.deepEqual(obj, {name: 'foo', bar: 'baz'});
+                done();
+            });
+        });
+    });
+
+    it('<url>/?<queryString> broken', function (done) {
+        SERVER.pre(plugins.pre.sanitizePath());
+        SERVER.use(plugins.queryParser({
+            mapParams: true
+        }));
+        SERVER.get(/\/.*/, function (req, res, next) {
+            res.send(req.params);
+        });
+
+        SERVER.listen(8080, function () {
+            CLIENT.get('/?bar=baz', function (err, _, __, obj) {
+                assert.ifError(err);
+                assert.deepEqual(obj, {bar: 'baz'});
+                done();
+            });
+        });
+    });
+
 });
 
 
