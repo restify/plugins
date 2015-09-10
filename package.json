@@ -45,11 +45,12 @@
   ],
   "name": "restify-plugins",
   "version": "1.0.0",
-  "description": "collection of restify handler plugins",
+  "description": "A collection of core restify plugins",
   "main": "lib/index.js",
-  "homepage": "https://github.com/restify/plugins#readme",
+  "homepage": "https://github.com/restify/plugins",
   "scripts": {
-    "test": "make test"
+    "test": "make test",
+    "prepush": "make prepush"
   },
   "repository": {
     "type": "git",
