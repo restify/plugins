@@ -58,7 +58,7 @@ describe('gzip parser', function () {
             }
         };
         CLIENT.get(opts, function (err, _, res, obj) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.deepEqual({hello: 'world'}, obj);
             done();
         });
@@ -117,7 +117,7 @@ describe('gzip parser', function () {
             }
         };
         CLIENT.get(opts, function (err, _, res, obj) {
-            assert.notOk(err);
+            assert.ifError(err);
             var expectedResponse = {
                 foo: new Array(testResponseSize + 1).join('a')
             };
@@ -149,7 +149,7 @@ describe('gzip parser', function () {
         };
         CLIENT.gzip = {};
         CLIENT.post('/body/foo?name=markc', obj, function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.ok(res);
 
             if (res) {

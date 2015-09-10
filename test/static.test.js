@@ -80,18 +80,18 @@ describe('static resource plugin', function () {
         var tmpPath = path.join(__dirname, '../', tmpDir);
 
         mkdirp(tmpPath, function (err) {
-            assert.notOk(err);
+            assert.ifError(err);
             DIRS_TO_DELETE.push(tmpPath);
             var folderPath = path.join(tmpPath, testDir);
 
             mkdirp(folderPath, function (err2) {
-                assert.notOk(err2);
+                assert.ifError(err2);
 
                 DIRS_TO_DELETE.push(folderPath);
                 var file = path.join(folderPath, testFileName);
 
                 fs.writeFile(file, staticContent, function (err3) {
-                    assert.notOk(err3);
+                    assert.ifError(err3);
                     FILES_TO_DELETE.push(file);
                     var p = '/' + testDir + '/' + testFileName;
                     var opts = { directory: tmpPath };
@@ -113,7 +113,7 @@ describe('static resource plugin', function () {
                     }, plugins.serveStatic(opts));
 
                     CLIENT.get(p, function (err4, req, res, obj) {
-                        assert.notOk(err4);
+                        assert.ifError(err4);
                         assert.equal(res.headers['cache-control'],
                             'public, max-age=3600');
                         assert.deepEqual(obj, staticObj);

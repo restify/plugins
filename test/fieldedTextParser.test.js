@@ -71,9 +71,9 @@ describe('fielded text parser', function () {
             }
         };
         CLIENT.post(options, function (err, req) {
-            assert.notOk(err);
+            assert.ifError(err);
             req.on('result', function (errReq, res) {
-                assert.notOk(errReq);
+                assert.ifError(errReq);
                 res.body = '';
                 res.setEncoding('utf8');
                 res.on('data', function (chunk) {
@@ -100,9 +100,9 @@ describe('fielded text parser', function () {
             }
         };
         CLIENT.post(options, function (err, req) {
-            assert.notOk(err);
+            assert.ifError(err);
             req.on('result', function (errReq, res) {
-                assert.notOk(errReq);
+                assert.ifError(errReq);
                 res.body = '';
                 res.setEncoding('utf8');
                 res.on('data', function (chunk) {

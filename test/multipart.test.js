@@ -192,7 +192,7 @@ describe('multipart parser', function () {
         var detailsString = 'High endorphin levels make you happy. ' +
             'Mostly... I guess. Whatever.';
         SERVER.post('/multipart/:id',
-            restify.bodyParser({
+            plugins.bodyParser({
                 multipartHandler: function (part) {
                     var buffer = new Buffer(0);
                     part.on('data', function (data) {
@@ -263,7 +263,7 @@ describe('multipart parser', function () {
         var content = 'Hello World!';
         var hash = '2ef7bde608ce5404e97d5f042f95f89f1c232871';
         SERVER.post('/multipart',
-            restify.bodyParser({hash: 'sha1'}),
+            plugins.bodyParser({hash: 'sha1'}),
             function (req, res, next) {
                 assert.equal(req.files.details.hash, hash);
                 res.send();

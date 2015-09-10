@@ -68,7 +68,7 @@ describe('JSON body parser', function () {
 
         STRING_CLIENT.post('/body/foo?name=markc', 'null',
         function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });
@@ -86,7 +86,7 @@ describe('JSON body parser', function () {
         });
 
         CLIENT.post('/body/foo', null, function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });
@@ -109,7 +109,7 @@ describe('JSON body parser', function () {
             id: 'bar',
             name: 'alex'
         }, function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });
@@ -153,7 +153,7 @@ describe('JSON body parser', function () {
             id: 'bar',
             name: 'alex'
         }, function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });
@@ -178,7 +178,7 @@ describe('JSON body parser', function () {
             id: 'bar',
             name: 'alex'
         }, function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });
@@ -209,7 +209,7 @@ describe('JSON body parser', function () {
             orange: 'orange',
             banana: 'yellow'
         }, function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });
@@ -290,7 +290,7 @@ describe('JSON body parser', function () {
 
         var obj = ['foo', 'bar'];
         CLIENT.post('/gh111', obj, function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });
@@ -322,7 +322,31 @@ describe('JSON body parser', function () {
             }
         ];
         CLIENT.post('/gh279', obj, function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
+            assert.equal(res.statusCode, 200);
+            done();
+        });
+    });
+
+    it('GH-774 utf8 corruption in body parser', function (done) {
+        var slen = 100000;
+        SERVER.use(plugins.bodyParser());
+        SERVER.post('/utf8', function (req, res, next) {
+            assert.notOk(/\ufffd/.test(req.body.text));
+            assert.equal(req.body.text.length, slen);
+            res.send({ len: req.body.text.length });
+            next();
+        });
+
+        // create a long string of unicode characters
+        var tx = '';
+
+        for (var i = 0; i < slen; ++i) {
+            tx += '\u2661';
+        }
+
+        CLIENT.post('/utf8', { text: tx }, function (err, _, res) {
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });

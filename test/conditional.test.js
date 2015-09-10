@@ -63,7 +63,7 @@ describe('accept parser', function () {
             }
         };
         CLIENT.get(opts, function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 304);
             done();
         });
@@ -117,7 +117,7 @@ describe('accept parser', function () {
             }
         };
         CLIENT.get(opts, function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 304);
             done();
         });
@@ -174,7 +174,7 @@ describe('accept parser', function () {
         };
 
         CLIENT.get(opts, function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 304);
             done();
         });
@@ -202,7 +202,7 @@ describe('accept parser', function () {
             }
         };
         CLIENT.get(opts, function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });

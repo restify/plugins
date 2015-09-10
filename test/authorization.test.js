@@ -56,7 +56,7 @@ describe('authorization parser', function () {
             }
         };
         CLIENT.get(opts, function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });

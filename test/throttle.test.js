@@ -77,7 +77,7 @@ describe('throttle plugin', function () {
 
     it('ok', function (done) {
         CLIENT.get('/test/throttleMe', function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });
@@ -106,7 +106,7 @@ describe('throttle plugin', function () {
 
     it('ok after tokens', function (done) {
         CLIENT.get('/test/throttleMe', function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });
@@ -115,7 +115,7 @@ describe('throttle plugin', function () {
 
     it('override limited', function (done) {
         CLIENT.get('/test/special', function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });
@@ -124,7 +124,7 @@ describe('throttle plugin', function () {
 
     it('override limited (not throttled)', function (done) {
         CLIENT.get('/test/special', function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });
@@ -146,7 +146,7 @@ describe('throttle plugin', function () {
 
     it('override unlimited', function (done) {
         CLIENT.get('/test/admin', function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });
@@ -155,7 +155,7 @@ describe('throttle plugin', function () {
 
     it('override unlimited (not throttled)', function (done) {
         CLIENT.get('/test/admin', function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });

@@ -52,7 +52,7 @@ describe('query parser', function () {
         });
 
         CLIENT.get('/query/foo', function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });
@@ -71,7 +71,7 @@ describe('query parser', function () {
         });
 
         CLIENT.get('/query/foo?id=bar&name=markc', function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });
@@ -90,7 +90,7 @@ describe('query parser', function () {
         });
 
         CLIENT.get('/query/foo?id=bar&name=markc', function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });
@@ -111,7 +111,7 @@ describe('query parser', function () {
         });
 
         CLIENT.get('/query/foo?id=bar&name=markc', function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });
@@ -131,7 +131,7 @@ describe('query parser', function () {
 
         var p = '/query/foo?name[first]=mark&name[last]=cavage';
         CLIENT.get(p, function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });
@@ -150,7 +150,7 @@ describe('query parser', function () {
 
         var p = '/query/foo?char[]=a&char[]=b&char[]=c';
         CLIENT.get(p, function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });
@@ -173,7 +173,7 @@ describe('query parser', function () {
         var p = '/query/foo?pizza[left][]=ham&pizza[left][]=bacon&' +
                 'pizza[right][]=pineapple';
         CLIENT.get(p, function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });

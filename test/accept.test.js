@@ -49,7 +49,7 @@ describe('accept parser', function () {
 
     it('accept ok', function (done) {
         CLIENT.get('/', function (err, _, res) {
-            assert.notOk(err);
+            assert.ifError(err);
             assert.equal(res.statusCode, 200);
             done();
         });
