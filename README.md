@@ -1,91 +1,102 @@
-![restify](/../gh-images/logo/png/restify_logo_black_transp_288x288.png?raw=true "restify")
+# restify-plugins
 
-[![Build Status](https://travis-ci.org/restify/node-restify.svg)](https://travis-ci.org/restify/node-restify)
-[![Gitter chat](https://badges.gitter.im/mcavage/node-restify.svg)](https://gitter.im/mcavage/node-restify)
-[![Dependency Status](https://david-dm.org/restify/node-restify.svg)](https://david-dm.org/restify/node-restify)
-[![devDependency Status](https://david-dm.org/restify/node-restify/dev-status.svg)](https://david-dm.org/restify/node-restify#info=devDependencies)
-[![bitHound Score](https://www.bithound.io/github/restify/node-restify/badges/score.svg)](https://www.bithound.io/github/restify/node-restify/master)
+[![NPM Version](https://img.shields.io/npm/v/plugins.svg)](https://npmjs.org/package/plugins)
+[![Build Status](https://travis-ci.org/restify/plugins.svg?branch=master)](https://travis-ci.org/restify/plugins)
+[![Coverage Status](https://coveralls.io/repos/restify/plugins/badge.svg?branch=master)](https://coveralls.io/r/restify/plugins?branch=master)
+[![Dependency Status](https://david-dm.org/restify/plugins.svg)](https://david-dm.org/restify/plugins)
+[![devDependency Status](https://david-dm.org/restify/plugins/dev-status.svg)](https://david-dm.org/restify/plugins#info=devDependencies)
+[![bitHound Score](https://www.bithound.io/github/restify/plugins/badges/score.svg)](https://www.bithound.io/github/restify/plugins/master)
+[![NSP Status](https://img.shields.io/badge/NSP%20status-vulnerabilities%20found-red.svg)](https://travis-ci.org/restify/plugins)
 
-[restify](http://restifyjs.com) is a smallish framework,
-similar to [express](http://expressjs.com) for building REST APIs.  For full
-details, see http://restify.com
+> A collection of core restify plugins
 
-Join us on IRC at `irc.freenode.net` in the `#restify` channel for real-time
-chat and support.
+## Getting Started
 
-# Usage
+Install the module with: `npm install restify-plugins`
 
-## Server
-```javascript
-var restify = require('restify');
+## Usage
 
-var server = restify.createServer({
-  name: 'myapp',
-  version: '1.0.0'
-});
-server.use(restify.acceptParser(server.acceptable));
-server.use(restify.queryParser());
-server.use(restify.bodyParser());
+This is the core set of plugins that restify ships with. These include lots of
+header parsing handlers, data parsing handlers, as well as other useful logging/metrics handlers.
 
-server.get('/echo/:name', function (req, res, next) {
-  res.send(req.params);
-  return next();
-});
+This module includes the follow `pre` plugins, which are intended to be used
+prior to the routing of a request:
 
-server.listen(8080, function () {
-  console.log('%s listening at %s', server.name, server.url);
-});
+* `sanitizePath()` - cleans up duplicate or trailing / on the URL
+* `userAgent(options)` - used to support edge cases for HEAD requests when using curl
+  * `options.userAgentRegExp` {RegExp} regexp to capture curl user-agents
+
+This module includes the following header parser plugins:
+
+* `acceptParser(accepts)` - Accept header
+  * `accepts` {Array} an array of acceptable types
+* `authorizationParser(options)` - Authorization header
+  * `options` {Object} options object passed to http-signature module
+* `conditionalRequest()` - Conditional headers (If-\*)
+* `fullResponse()` - handles disappeared CORS headers
+
+This module includes the following data parsing plugins:
+
+* `auditLogger(options)` - an audit logger for recording all handled requests
+  * `options.log` {Object} bunyan logger
+  * `options.body` {?}
+* `bodyParser(options)` - parses POST bodies to `req.body`. automatically uses one of the following parsers based on content type:
+  * `urlEncodedBodyParser(options)` - parses url encoded form bodies
+  * `jsonBodyParser(options)` - parses JSON POST bodies
+  * `multipartBodyParser(options)` - parses multipart form bodies
+  * All bodyParsers support the following options:
+    * `options.mapParams` - default false. copies parsed post body values onto req.params
+    * `options.overrideParams` - default false. only applies when if mapParams true. when true, will stomp on req.params value when existing value is found.
+* `jsonp()` - parses JSONP callback
+* `queryParser()` - parses URL query paramters
+  * `options.mapParams` - default false. copies parsed post body values onto req.params
+  * `options.overrideParams` - default false. only applies when if mapParams true. when true, will stomp on req.params value when existing value is found.
+* `requestLogger(options)` - adds timers for each handler in your request chain
+  * `options.properties` {Object} properties to pass to bunyan's `log.child()` method
+
+The module includes the following response plugins:
+
+* `dateParser(delta)` - expires requests based on current time + delta
+  * `delta` {Number} age in seconds
+* `gzip(options)` - gzips the response if client accepts it
+  * `options` {Object} options to pass to zlib
+* `serveStatic()` - used to serve static files
+* `throttle(options)` - throttles responses
+  * `options.burst` {Number}
+  * `options.rate` {Number}
+  * `options.ip` {Boolean}
+  * `options.username` {Boolean}
+  * `options.xff` {Boolean}
+  * `options.overrides` {Object}
+* `requestExpiry(options)` - expires requests based on absolute time since epoch
+  * `options.header` {String} name of header to check
+
+
+## Contributing
+
+Add unit tests for any new or changed functionality. Ensure that lint and style
+checks pass.
+
+To start contributing, install the git pre-push hooks:
+
+```sh
+make githooks
 ```
 
-## Client
-```javascript
-var assert = require('assert');
-var restify = require('restify');
+Before committing, run the prepush hook:
 
-var client = restify.createJsonClient({
-  url: 'http://localhost:8080',
-  version: '~1.0'
-});
-
-client.get('/echo/mark', function (err, req, res, obj) {
-  assert.ifError(err);
-  console.log('Server returned: %j', obj);
-});
+```sh
+make prepush
 ```
 
-# Installation
+If you have style errors, you can auto fix whitespace issues by running:
 
-    $ npm install restify
+```sh
+make codestyle-fix
+```
 
 ## License
 
-The MIT License (MIT)
-Copyright (c) 2012 Mark Cavage
+Copyright (c) 2015 Alex Liu
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-## Bugs
-
-See <https://github.com/restify/node-restify/issues>.
-
-## Mailing list
-
-See the
-[Google group](https://groups.google.com/forum/?hl=en&fromgroups#!forum/restify)
-.
+Licensed under the MIT license.
