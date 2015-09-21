@@ -1,5 +1,10 @@
 {
-    "rules": {
-        "handle-callback-err": [ 0 ]
-    }
+env: {
+mocha: true
+},
+rules: {
+no-unused-expressions: [
+0
+]
+}
 }
