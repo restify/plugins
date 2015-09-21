@@ -44,7 +44,7 @@
         "default-case": [ 2 ],
         "dot-notation": [ 2, { "allowKeywords": true } ],
         "eqeqeq": [ 2 ],
-        "guard-for-in": [ 0 ],
+        "guard-for-in": [ 2 ],
         "no-alert": [ 2 ],
         "no-caller": [ 2 ],
         "no-div-regex": [ 2 ],
