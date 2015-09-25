@@ -7,5 +7,5 @@
 ### Breaking changes
 - plugins moved into their own repository
 - `sanitizePath` now available only on the `pre` export
--
-
+- `mapParams: false` is now the default setting for both the queryParser and
+  bodyParser plugins
