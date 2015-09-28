@@ -64,8 +64,8 @@ describe('audit logger', function () {
                 res.send('');
                 return (next());
             }, 1100);
-            // this really should be 1000 but make it 1100 so that the tests don't
-            // sporadically fail due to timing issues.
+            // this really should be 1000 but make it 1100 so that the tests
+            // don't sporadically fail due to timing issues.
         });
 
         CLIENT.get('/audit', function (err, req, res) {
