@@ -68,8 +68,20 @@ The module includes the following response plugins:
   * `options.username` {Boolean}
   * `options.xff` {Boolean}
   * `options.overrides` {Object}
-* `requestExpiry(options)` - expires requests based on absolute time since epoch
-  * `options.header` {String} name of header to check
+* `requestExpiry(options)` - A request expiry will use headers to tell if the incoming request has expired or not. There are two options for this plugin:
+  1. Absolute Time
+     * Time in Milliseconds since the Epoch when this request should be
+       considered expired
+  2. Timeout
+     * The request start time is supplied
+     * A timeout, in milliseconds, is given
+     * The timeout is added to the request start time to arrive at the
+       absolute time in which the request is considered expires
+
+  * `options.absoluteHeader` {String} header name of the absolute time for request expiration
+  * `options.startHeader` {String} header name for the start time of the request
+  * `options.timeoutHeader` {String}  The header name for the time in milliseconds that should ellapse before the request is considered expired.
+
 
 
 ## Contributing
