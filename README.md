@@ -1,6 +1,6 @@
 # restify-plugins
 
-[![NPM Version](https://img.shields.io/npm/v/plugins.svg)](https://npmjs.org/package/plugins)
+[![NPM Version](https://img.shields.io/npm/v/restify-plugins.svg)](https://npmjs.org/package/restify-plugins)
 [![Build Status](https://travis-ci.org/restify/plugins.svg?branch=master)](https://travis-ci.org/restify/plugins)
 [![Coverage Status](https://coveralls.io/repos/restify/plugins/badge.svg?branch=master)](https://coveralls.io/r/restify/plugins?branch=master)
 [![Dependency Status](https://david-dm.org/restify/plugins.svg)](https://david-dm.org/restify/plugins)
