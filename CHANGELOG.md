@@ -9,3 +9,5 @@
 - `sanitizePath` now available only on the `pre` export
 - `mapParams: false` is now the default setting for both the queryParser and
   bodyParser plugins
+- request expiration plugin now has two options, absolute time and timeout, the
+  signature of the options has changed.
