@@ -47,7 +47,7 @@ describe('audit logger', function () {
             limit: 1000
         });
         var fooRequest, barRequest, collectLog;
-        SERVER.on('after', restify.auditLogger({
+        SERVER.on('after', plugins.auditLogger({
             log: bunyan.createLogger({
                 name: 'audit',
                 streams: [{
@@ -126,7 +126,7 @@ describe('audit logger', function () {
             limit: 1000
         });
         var collectLog;
-        SERVER.on('after', restify.auditLogger({
+        SERVER.on('after', plugins.auditLogger({
             log: bunyan.createLogger({
                 name: 'audit',
                 streams: [{
@@ -184,6 +184,40 @@ describe('audit logger', function () {
             //console.log('results: %s', util.inspect(results, null, 2));
             collectLog();
         });
+    });
+    it('test audit logger emit', function (done) {
+        var auditLoggerObj = plugins.auditLogger({
+            log: bunyan.createLogger({
+                name: 'audit',
+                streams: [{
+                    level: 'info',
+                    stream: process.stdout
+                }]
+            }),
+            server: SERVER
+        });
+
+        SERVER.on('after', auditLoggerObj);
+        SERVER.on('auditlog', function (data) {
+            assert.ok(data);
+            assert.ok(data.req_id);
+            assert.equal(data.req.url, '/audit',
+                'request url should be /audit');
+            assert.isNumber(data.latency);
+            done();
+        });
+        SERVER.get('/audit', [
+            restify.queryParser(),
+            function (req, res, next) {
+                res.send();
+                next();
+            }
+        ]);
+        CLIENT.get('/audit', function (err, req, res) {
+            assert.ifError(err);
+        });
+
+
     });
     it('should log handler timers', function (done) {
         // Dirty hack to capture the log record using a ring buffer.
