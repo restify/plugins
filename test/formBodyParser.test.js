@@ -248,5 +248,34 @@ describe('form body parser', function () {
         client.end();
     });
 
+    it('plugins-GH-6: should expose rawBody', function (done) {
+
+        var input = 'name[first]=alex&name[last]=liu';
+
+        SERVER.use(plugins.bodyParser());
+
+        SERVER.post('/bodyurl2/:id', function (req, res, next) {
+            assert.equal(req.rawBody, input);
+            res.send();
+            next();
+        });
+
+        var opts = {
+            hostname: '127.0.0.1',
+            port: PORT,
+            path: '/bodyurl2/foo',
+            agent: false,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        };
+        var client = http.request(opts, function (res) {
+            assert.equal(res.statusCode, 200);
+            done();
+        });
+        client.write(input);
+        client.end();
+    });
 });
 
