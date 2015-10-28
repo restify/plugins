@@ -414,6 +414,26 @@ describe('JSON body parser', function () {
         client.end();
     });
 
+
+    it('plugins-GH-6: should expose rawBody', function (done) {
+
+        var payload = {
+            id: 'bar',
+            name: 'alex'
+        };
+
+        SERVER.use(plugins.jsonBodyParser());
+
+        SERVER.post('/body/:id', function (req, res, next) {
+            assert.equal(req.rawBody, JSON.stringify(payload));
+            assert.equal(req.body.id, 'bar');
+            assert.equal(req.body.name, 'alex');
+            res.send();
+            next();
+        });
+
+        CLIENT.post('/body/foo', payload, done);
+    });
 });
 
 

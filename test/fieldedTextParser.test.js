@@ -34,19 +34,12 @@ var OBJECT_TSV = require(path.join(__dirname, '/files/object-tsv.json'));
 
 describe('fielded text parser', function () {
 
-    before(function (done) {
+    beforeEach(function (done) {
         SERVER = restify.createServer({
             dtrace: helper.dtrace,
             log: helper.getLog('server')
         });
         SERVER.use(plugins.bodyParser());
-        SERVER.post('/data', function respond(req, res, next) {
-            res.send({
-                status: 'okay',
-                parsedReq: req.body
-            });
-            return next();
-        });
         SERVER.listen(PORT, '127.0.0.1', function () {
             CLIENT = restifyClients.createClient({
                 url: 'http://127.0.0.1:' + PORT,
@@ -57,7 +50,7 @@ describe('fielded text parser', function () {
         });
     });
 
-    after(function (done) {
+    afterEach(function (done) {
         CLIENT.close();
         SERVER.close(done);
     });
@@ -70,6 +63,15 @@ describe('fielded text parser', function () {
                 'Content-Type': 'text/csv'
             }
         };
+
+        SERVER.post('/data', function respond(req, res, next) {
+            res.send({
+                status: 'okay',
+                parsedReq: req.body
+            });
+            return next();
+        });
+
         CLIENT.post(options, function (err, req) {
             assert.ifError(err);
             req.on('result', function (errReq, res) {
@@ -99,6 +101,15 @@ describe('fielded text parser', function () {
                 'Content-Type': 'text/tsv'
             }
         };
+
+        SERVER.post('/data', function respond(req, res, next) {
+            res.send({
+                status: 'okay',
+                parsedReq: req.body
+            });
+            return next();
+        });
+
         CLIENT.post(options, function (err, req) {
             assert.ifError(err);
             req.on('result', function (errReq, res) {
@@ -115,6 +126,36 @@ describe('fielded text parser', function () {
                     assert.equal(parsedReqStr, objectStr);
                     done();
                 });
+            });
+            req.write(DATA_TSV);
+            req.end();
+        });
+    });
+
+    it('plugins-GH-6: should expose rawBody on request', function (done) {
+        var options = {
+            path: '/data',
+            headers: {
+                'Content-Type': 'text/csv'
+            }
+        };
+
+        SERVER.post('/data', function respond(req, res, next) {
+            assert.ok(req.rawBody);
+            res.send();
+            return next();
+        });
+
+        CLIENT.post(options, function (err, req) {
+            assert.ifError(err);
+            req.on('result', function (errReq, res) {
+                assert.ifError(errReq);
+                res.body = '';
+                res.setEncoding('utf8');
+                res.on('data', function (chunk) {
+                    res.body += chunk;
+                });
+                res.on('end', done);
             });
             req.write(DATA_TSV);
             req.end();
