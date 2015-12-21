@@ -44,7 +44,7 @@
     "Zachary Snow"
   ],
   "name": "restify-plugins",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A collection of core restify plugins",
   "main": "lib/index.js",
   "homepage": "https://github.com/restify/plugins",
