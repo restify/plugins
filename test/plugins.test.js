@@ -117,10 +117,6 @@ describe('all other plugins', function () {
                 assert.equal(res.statusCode, 200);
                 var headers = res.headers;
                 assert.ok(headers, 'headers ok');
-                assert.ok(headers['access-control-allow-origin']);
-                assert.ok(headers['access-control-allow-headers']);
-                assert.ok(headers['access-control-expose-headers']);
-                assert.ok(headers['access-control-allow-methods']);
                 assert.ok(headers.date);
                 assert.ok(headers['request-id']);
                 assert.ok(headers['response-time'] >= 0);
