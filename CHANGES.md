@@ -1,3 +1,11 @@
+# 1.1.0
+
+- NEW: unified CORS plugin for both preflight and regular requests
+  - allow customization of allowed/exposed headers
+  - use matched origin for non-credential requests
+  - various new options (see README.md)
+- BREAKING: remove all CORS access-control-* headers from the fullResponse plugin
+
 # 1.0.2
 
 - merges [commit](https://github.com/restify/node-restify/commit/fbd56f5751f82031c8b0e677f0bdd677c7b95892)

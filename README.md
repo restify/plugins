@@ -33,7 +33,7 @@ This module includes the following header parser plugins:
 * `authorizationParser(options)` - Authorization header
   * `options` {Object} options object passed to http-signature module
 * `conditionalRequest()` - Conditional headers (If-\*)
-* `fullResponse()` - handles disappeared CORS headers
+* `fullResponse()` - adds universal response headers
 
 This module includes the following data parsing plugins:
 
@@ -82,7 +82,50 @@ The module includes the following response plugins:
   * `options.startHeader` {String} header name for the start time of the request
   * `options.timeoutHeader` {String}  The header name for the time in milliseconds that should ellapse before the request is considered expired.
 
+### CORS
 
+This module also includes CORS support:
+
+* `cors(options)`
+  * `options.origins` {Array} array of origins to allow
+  * `options.credentials` {Boolean} enable credentialed requests
+  * `options.allowHeaders` {Array} array of header names to allow
+  * `options.exposeHeaders` {Array} array of header names to expose
+  * `options.preflightMaxAge` {Number} time in ms to set for access-control-max-age header. Defaults to 3600 (5min).
+  * `options.preflightStrategy` {restify server | Function | Boolean} strategy for handling preflight requests
+
+The CORS plugin now returns two values, one for handling preflight and one
+for handling standard requests. The preflight strategy can accept an
+instance of your restify server to automatically handle preflight requests.
+Alternatively, you can provide a function that returns the list of supported
+methods for a given request. If a value is not provided, then the preflight
+handler will not be created for you. In that scenario, server.opts must be
+manually defined on every CORS resource. Here's an example:
+
+```js
+var cors = plugins.cors({
+    origins: [ 'http://somesite.local', '*'],
+    allowHeaders: [ 'x-foobar' ],
+    preflightStrategy: server
+});
+
+server.pre(cors.preflight);
+server.use(cors.headers);
+```
+
+If you choose to use a custom function to do resolution:
+
+```js
+function preflightStrategy(req, res, callback) {
+    var url = req.path();
+
+    // given an incoming request, let's say the requested url is
+    // /foobar, you must return an array of method names supported by
+    // that url.
+
+    return callback(null, ['GET', 'POST']);
+}
+```
 
 ## Contributing
 
