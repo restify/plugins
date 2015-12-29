@@ -207,7 +207,7 @@ describe('audit logger', function () {
             done();
         });
         SERVER.get('/audit', [
-            restify.queryParser(),
+            plugins.queryParser(),
             function (req, res, next) {
                 res.send();
                 next();
