@@ -1,8 +1,5 @@
 'use strict';
 
-// core modules
-var http = require('http');
-
 // external modules
 var assert = require('chai').assert;
 var restify = require('restify');
@@ -13,7 +10,7 @@ var plugins = require('../lib');
 var helper = require('./lib/helper');
 
 // local globals
-var PORT = process.env.UNIT_TEST_PORT || 0;
+var PORT = 3000;
 var CLIENT;
 var SERVER;
 var AC_ALLOW_CREDS = 'access-control-allow-credentials';
@@ -23,6 +20,11 @@ var AC_MAX_AGE = 'access-control-max-age';
 
 
 function setupCors(options) {
+
+    if (!options.preflightStrategy) {
+        options.preflightStrategy = SERVER;
+    }
+
     var cors = plugins.cors(options);
     SERVER.pre(cors.preflight);
     SERVER.use(cors.headers);
@@ -32,15 +34,18 @@ function setupCors(options) {
 function preflight(options, callback) {
 
     var opts = {
-        hostname: '127.0.0.1',
-        port: PORT,
         path: options.path || '/foo/bar',
-        method: 'OPTIONS',
-        agent: false,
         headers: options.headers
     };
 
-    http.request(opts, callback).end();
+    CLIENT = restifyClients.createJsonClient({
+        url: 'http://127.0.0.1:' + PORT,
+        dtrace: helper.dtrace,
+        retry: false,
+        headers: opts.headers
+    });
+
+    CLIENT.opts(opts.path, callback);
 }
 
 
@@ -49,18 +54,10 @@ describe('CORS', function () {
     beforeEach(function (done) {
         SERVER = restify.createServer({
             dtrace: helper.dtrace,
-            log: helper.getLog('server'),
-            version: ['2.0.0', '0.5.4', '1.4.3']
+            log: helper.getLog('server')
         });
         SERVER.post('/foo/:id', function tester (req, res, next) {});
-        SERVER.listen(PORT, '127.0.0.1', function () {
-            PORT = SERVER.address().port;
-            CLIENT = restifyClients.createJsonClient({
-                url: 'http://127.0.0.1:' + PORT,
-                dtrace: helper.dtrace,
-                retry: false
-            });
-
+        SERVER.listen(PORT, function () {
             done();
         });
     });
@@ -86,7 +83,8 @@ describe('CORS', function () {
                     'Access-Control-Request-Method': 'POST',
                     Origin: 'http://somesite.local'
                 }
-            }, function (res) {
+            }, function (err, req, res, data) {
+                assert.ifError(err);
                 assert.equal(res.statusCode, 200);
                 assert.equal(res.headers[AC_ALLOW_ORIGIN],
                              'http://somesite.local');
@@ -108,7 +106,8 @@ describe('CORS', function () {
                     'Access-Control-Request-Method': 'POST',
                     Origin: 'http://anysite.local'
                 }
-            }, function (res) {
+            }, function (err, req, res, data) {
+                assert.ifError(err);
                 assert.equal(res.statusCode, 200);
                 assert.equal(res.headers[AC_ALLOW_ORIGIN], '*');
                 assert.equal(res.headers[AC_ALLOW_CREDS], undefined);
@@ -119,8 +118,7 @@ describe('CORS', function () {
         it('should return 400 for non matching origin', function (done) {
 
             setupCors({
-                origins: [ 'http://somesite.local' ],
-                preflightStrategy: SERVER
+                origins: [ 'http://somesite.local' ]
             });
 
             preflight({
@@ -129,7 +127,8 @@ describe('CORS', function () {
                     'Access-Control-Request-Method': 'POST',
                     Origin: 'http://anysite.local'
                 }
-            }, function (res) {
+            }, function (err, req, res, data) {
+                assert.ok(err);
                 assert.equal(res.statusCode, 400);
                 assert.equal(res.headers[AC_ALLOW_ORIGIN], undefined);
                 assert.equal(res.headers[AC_ALLOW_CREDS], undefined);
@@ -141,8 +140,7 @@ describe('CORS', function () {
 
             setupCors({
                 credentials: true,
-                origins: [ 'http://somesite.local' ],
-                preflightStrategy: SERVER
+                origins: [ 'http://somesite.local' ]
             });
 
             preflight({
@@ -152,7 +150,8 @@ describe('CORS', function () {
                     Origin: 'http://somesite.local'
                 },
                 path: '/bar/baz'
-            }, function (res) {
+            }, function (err, req, res, data) {
+                assert.ok(err);
                 assert.equal(res.statusCode, 400);
                 assert.equal(res.headers[AC_ALLOW_ORIGIN], undefined);
                 assert.equal(res.headers[AC_ALLOW_CREDS], undefined);
@@ -164,8 +163,7 @@ describe('CORS', function () {
 
             setupCors({
                 credentials: true,
-                origins: [ 'http://somesite.local' ],
-                preflightStrategy: SERVER
+                origins: [ 'http://somesite.local' ]
             });
 
             preflight({
@@ -174,7 +172,8 @@ describe('CORS', function () {
                     'Access-Control-Request-Method': 'GET',
                     Origin: 'http://somesite.local'
                 }
-            }, function (res) {
+            }, function (err, req, res, data) {
+                assert.ok(err);
                 assert.equal(res.statusCode, 405);
                 assert.equal(res.headers[AC_ALLOW_ORIGIN], undefined);
                 assert.equal(res.headers[AC_ALLOW_CREDS], undefined);
@@ -186,8 +185,7 @@ describe('CORS', function () {
 
             setupCors({
                 origins: [ 'http://somesite.local' ],
-                credentials: true,
-                preflightStrategy: SERVER
+                credentials: true
             });
 
             preflight({
@@ -196,7 +194,8 @@ describe('CORS', function () {
                     'Access-Control-Request-Method': 'POST',
                     Origin: 'http://somesite.local'
                 }
-            }, function (res) {
+            }, function (err, req, res, data) {
+                assert.ifError(err);
                 assert.equal(res.statusCode, 200);
                 assert.equal(res.headers[AC_ALLOW_ORIGIN],
                              'http://somesite.local');
@@ -221,7 +220,8 @@ describe('CORS', function () {
                     'Access-Control-Request-Method': 'POST',
                     Origin: 'http://somesite.local'
                 }
-            }, function (res) {
+            }, function (err, req, res, data) {
+                assert.ok(err);
                 assert.equal(res.statusCode, 400);
                 assert.equal(res.headers[AC_ALLOW_ORIGIN], undefined);
                 assert.equal(res.headers[AC_ALLOW_CREDS], undefined);
@@ -234,7 +234,6 @@ describe('CORS', function () {
             setupCors({
                 origins: [ 'http://somesite.local' ],
                 credentials: true,
-                preflightStrategy: SERVER,
                 allowHeaders: ['x-foobar']
             });
 
@@ -245,7 +244,8 @@ describe('CORS', function () {
                     'Access-Control-Request-Method': 'POST',
                     Origin: 'http://somesite.local'
                 }
-            }, function (res) {
+            }, function (err, req, res, data) {
+                assert.ifError(err);
                 assert.equal(res.statusCode, 200);
                 assert.equal(res.headers[AC_ALLOW_ORIGIN],
                              'http://somesite.local');
@@ -267,7 +267,8 @@ describe('CORS', function () {
                     'Access-Control-Request-Method': 'POST',
                     Origin: 'http://somesite.local'
                 }
-            }, function (res) {
+            }, function (err, req, res, data) {
+                assert.ifError(err);
                 assert.equal(res.statusCode, 200);
                 assert.equal(res.headers[AC_ALLOW_ORIGIN],
                              'http://somesite.local');
@@ -280,8 +281,7 @@ describe('CORS', function () {
 
             setupCors({
                 origins: [ 'http://somesite.local' ],
-                preflightMaxAge: 1000,
-                preflightStrategy: SERVER
+                preflightMaxAge: 1000
             });
 
             preflight({
@@ -290,7 +290,8 @@ describe('CORS', function () {
                     'Access-Control-Request-Method': 'POST',
                     Origin: 'http://somesite.local'
                 }
-            }, function (res) {
+            }, function (err, req, res, data) {
+                assert.ifError(err);
                 assert.equal(res.statusCode, 200);
                 assert.equal(res.headers[AC_ALLOW_ORIGIN],
                              'http://somesite.local');
@@ -298,12 +299,122 @@ describe('CORS', function () {
                 done();
             });
         });
+
+        it('should not continue after preflight handler', function (done) {
+
+            setupCors({
+                origins: [ 'somesite.local' ]
+            });
+
+            SERVER.use(function foo(req, res, next) {
+                res.send('foo');
+                return next();
+            });
+
+            preflight({
+                headers: {
+                    'Access-Control-Request-Headers': 'accept, content-type',
+                    'Access-Control-Request-Method': 'POST',
+                    Origin: 'http://somesite.local'
+                }
+            }, function (err, req, res, data) {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert.notEqual(data, 'foo');
+                done();
+            });
+
+        });
+    });
+
+    describe('regexp matching', function () {
+
+        it('should allow any protocol for origin', function (done) {
+
+            setupCors({
+                origins: [ 'somesite.local' ]
+            });
+
+            preflight({
+                headers: {
+                    'Access-Control-Request-Headers': 'accept, content-type',
+                    'Access-Control-Request-Method': 'POST',
+                    Origin: 'http://somesite.local'
+                }
+            }, function (err, req, res, data) {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert.equal(res.headers['access-control-allow-origin'],
+                    'http://somesite.local');
+                done();
+            });
+        });
+
+        it('should allow any subdomain for origin', function (done) {
+
+            setupCors({
+                origins: [ 'http://*.somesite.local' ]
+            });
+
+            preflight({
+                headers: {
+                    'Access-Control-Request-Headers': 'accept, content-type',
+                    'Access-Control-Request-Method': 'POST',
+                    Origin: 'http://test.somesite.local'
+                }
+            }, function (err, req, res, data) {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert.equal(res.headers['access-control-allow-origin'],
+                    'http://test.somesite.local');
+                done();
+            });
+        });
+
+        it('should allow any subdomain, any protocol', function (done) {
+
+            setupCors({
+                origins: [ '*.somesite.local' ]
+            });
+
+            preflight({
+                headers: {
+                    'Access-Control-Request-Headers': 'accept, content-type',
+                    'Access-Control-Request-Method': 'POST',
+                    Origin: 'https://test.somesite.local'
+                }
+            }, function (err, req, res, data) {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert.equal(res.headers['access-control-allow-origin'],
+                    'https://test.somesite.local');
+                done();
+            });
+        });
+
+        it('should allow regular expression', function (done) {
+            setupCors({
+                origins: [ /^https?:\/\/test[0-9]+\.somesite\.local$/ ]
+            });
+
+            preflight({
+                headers: {
+                    'Access-Control-Request-Headers': 'accept, content-type',
+                    'Access-Control-Request-Method': 'POST',
+                    Origin: 'https://test1.somesite.local'
+                }
+            }, function (err, req, res, data) {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert.equal(res.headers['access-control-allow-origin'],
+                    'https://test1.somesite.local');
+                done();
+            });
+        });
     });
 
 
     describe('cors headers', function () {
-
-
 
 
 
