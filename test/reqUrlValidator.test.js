@@ -16,7 +16,7 @@ var CLIENT;
 var PORT;
 var MESSAGE = 'Malformed request syntax';
 
-describe('request url validator', function () {
+describe.only('request url validator', function () {
 
     beforeEach(function (done) {
         SERVER = restify.createServer({
@@ -93,6 +93,34 @@ describe('request url validator', function () {
                 assert.deepEqual(JSON.parse(res.body), {
                     code: 'BadRequestError',
                     message: MESSAGE
+                });
+                done();
+            });
+    });
+
+    it('should respond 400 without message opt', function (done) {
+
+
+        SERVER.pre(plugins.pre.reqUrlValidator());
+
+        SERVER.use(plugins.queryParser({
+            mapParams: true,
+            overrideParams: true
+        }));
+
+        SERVER.get('/query/:id', function (req, res, next) {
+            res.send();
+            next();
+        });
+
+        CLIENT.get('/query/foo?id=bar&name="josep&jorge',
+            function (err, _, res) {
+
+                assert.equal(typeof err, 'object');
+                assert.equal(res.statusCode, 400);
+                assert.deepEqual(JSON.parse(res.body), {
+                    code: 'BadRequestError',
+                    message: ''
                 });
                 done();
             });
