@@ -6,7 +6,7 @@
 [![Dependency Status](https://david-dm.org/restify/plugins.svg)](https://david-dm.org/restify/plugins)
 [![devDependency Status](https://david-dm.org/restify/plugins/dev-status.svg)](https://david-dm.org/restify/plugins#info=devDependencies)
 [![bitHound Score](https://www.bithound.io/github/restify/plugins/badges/score.svg)](https://www.bithound.io/github/restify/plugins/master)
-[![NSP Status](https://img.shields.io/badge/NSP%20status-vulnerabilities%20found-red.svg)](https://travis-ci.org/restify/plugins)
+[![NSP Status](https://img.shields.io/badge/NSP%20status-no%20vulnerabilities-green.svg)](https://travis-ci.org/restify/plugins)
 
 > A collection of core restify plugins
 
@@ -25,6 +25,8 @@ prior to the routing of a request:
 * `sanitizePath()` - cleans up duplicate or trailing / on the URL
 * `userAgent(options)` - used to support edge cases for HEAD requests when using curl
   * `options.userAgentRegExp` {RegExp} regexp to capture curl user-agents
+* `reqUrlValidator()` - prevents issues with parsing ampersand (&) inside URI components and rejects malformed requests with status code 400, according to HTTP/1.1 protocol #5.1.2 Request-URI.
+  * `options.message` {String} response body message string
 
 This module includes the following header parser plugins:
 
