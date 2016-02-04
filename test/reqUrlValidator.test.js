@@ -16,7 +16,7 @@ var CLIENT;
 var PORT;
 var MESSAGE = 'Malformed request syntax';
 
-describe.only('request url validator', function () {
+describe('request url validator', function () {
 
     beforeEach(function (done) {
         SERVER = restify.createServer({
