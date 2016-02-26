@@ -9,7 +9,6 @@ var assert = require('chai').assert;
 var mkdirp = require('mkdirp');
 var restify = require('restify');
 var restifyClients = require('restify-clients');
-var rimraf = require('rimraf');
 
 // local files
 var helper = require('./lib/helper');
@@ -18,10 +17,7 @@ var plugins = require('../lib');
 // local globals
 var SERVER;
 var CLIENT;
-var PORT;
-var FILES_TO_DELETE = [];
-var DIRS_TO_DELETE = [];
-
+var PORT = 3000;
 
 
 describe('static resource plugin', function () {
@@ -32,9 +28,14 @@ describe('static resource plugin', function () {
             log: helper.getLog('server')
         });
 
+        SERVER.pre(plugins.serveStatic({
+            root: __dirname,
+            restifyServer: SERVER
+        }));
+
         SERVER.listen(PORT, '127.0.0.1', function () {
             PORT = SERVER.address().port;
-            CLIENT = restifyClients.createJsonClient({
+            CLIENT = restifyClients.createStringClient({
                 url: 'http://127.0.0.1:' + PORT,
                 dtrace: helper.dtrace,
                 retry: false
@@ -45,121 +46,85 @@ describe('static resource plugin', function () {
     });
 
     afterEach(function (done) {
-        var i;
-
-        for (i = 0; i < FILES_TO_DELETE.length; ++i) {
-            try {
-                fs.unlinkSync(FILES_TO_DELETE[i]);
-            }
-            catch (err) {
-                /* normal */
-            }
-        }
-
-        for (i = 0; i < DIRS_TO_DELETE.length; ++i) {
-            try {
-                rimraf.sync(DIRS_TO_DELETE[i]);
-            }
-            catch (err) {
-                /* normal */
-            }
-        }
-
         CLIENT.close();
         SERVER.close(done);
     });
 
 
-    function serveStaticTest(done, testDefault, tmpDir, regex, staticFile) {
-        var staticContent = '{"content": "abcdefg"}';
-        var staticObj = JSON.parse(staticContent);
-        var testDir = 'public';
-        var testFileName = 'index.json';
-        var routeName = 'GET wildcard';
-        var tmpPath = path.join(__dirname, '../', tmpDir);
+    it('should serve files', function (done) {
 
-        mkdirp(tmpPath, function (err) {
+        CLIENT.get('/static.test.js', function(err, req, res, data) {
             assert.ifError(err);
-            DIRS_TO_DELETE.push(tmpPath);
-            var folderPath = path.join(tmpPath, testDir);
+            assert.ok(data);
+            assert.isString(data);
+            assert.equal(res.headers['content-type'],
+						 'application/javascript; charset=utf-8');
+			done();
+        });
+    });
 
-            mkdirp(folderPath, function (err2) {
-                assert.ifError(err2);
+    it('should serve static files in nested folders', function (done) {
 
-                DIRS_TO_DELETE.push(folderPath);
-                var file = path.join(folderPath, testFileName);
+        CLIENT.get('/files/data-csv.txt', function(err, req, res, data) {
+            assert.ifError(err);
+            assert.ok(data);
+            assert.isString(data);
+            assert.equal(res.headers['content-type'],
+                         'text/plain; charset=UTF-8');
+			done();
+        });
+    });
 
-                fs.writeFile(file, staticContent, function (err3) {
-                    assert.ifError(err3);
-                    FILES_TO_DELETE.push(file);
-                    var p = '/' + testDir + '/' + testFileName;
-                    var opts = { directory: tmpPath };
+    it('should fire ResourceNotFound for file not found', function (done) {
 
-                    if (staticFile) {
-                        opts.file = p;
-                    }
+        var afterFired = 0;
 
-                    if (testDefault) {
-                        opts.defaultFile = testFileName;
-                        routeName += ' with default';
-                    }
-                    var re = regex ||
-                        new RegExp('/' + testDir + '/?.*');
-
-                    SERVER.get({
-                        path: re,
-                        name: routeName
-                    }, plugins.serveStatic(opts));
-
-                    CLIENT.get(p, function (err4, req, res, obj) {
-                        assert.ifError(err4);
-                        assert.equal(res.headers['cache-control'],
-                            'public, max-age=3600');
-                        assert.deepEqual(obj, staticObj);
-                        done();
-                    });
-                });
-            });
+        SERVER.on('after', function(req, res, route, err) {
+            afterFired++;
+            assert.ok(err);
         });
 
-    }
+        CLIENT.get('/idontexist.js', function(err, req, res, data) {
+            // arbitrary delay to ensure both events have fired
+            setTimeout(function() {
+                assert.ok(err);
+                assert.equal(afterFired, 1);
+                done();
+            }, 100);
+        });
 
-    it('static serves static files', function (done) {
-        serveStaticTest(done, false, '.tmp');
+	});
+
+    it('should emit server\'s after event', function (done) {
+
+        var afterFired = false;
+
+        SERVER.on('after', function(req, res, route, err) {
+            afterFired = true;
+            assert.ifError(err);
+            assert.isObject(req);
+            assert.isObject(res);
+            assert.isObject(route);
+            assert.equal(route.path, '/static.test.js');
+        });
+
+        CLIENT.get('/static.test.js', function(err, req, res, data) {
+            setTimeout(function() {
+                assert.ifError(err);
+                assert.ok(data);
+                assert.isString(data);
+                assert.equal(res.headers['content-type'],
+                             'application/javascript; charset=utf-8');
+                assert.isTrue(afterFired);
+                done();
+            }, 100);
+        });
+
     });
 
 
-    it('static serves static files in nested folders', function (done) {
-        serveStaticTest(done, false, '.tmp/folder');
-    });
-
-
-    it('static serves static files in with a root regex', function (done) {
-        serveStaticTest(done, false, '.tmp', new RegExp('/.*'));
-    });
-
-
-    it('static serves static files with a root, !greedy, regex',
+    it('should emit error and stop p rocessing for client terminated request',
     function (done) {
-        serveStaticTest(done, false, '.tmp', new RegExp('/?.*'));
+
     });
-
-
-    it('static serves default file', function (done) {
-        serveStaticTest(done, true, '.tmp');
-    });
-
-
-    it('restify-GH-379 static serves file with parentheses in path',
-    function (done) {
-        serveStaticTest(done, false, '.(tmp)');
-    });
-
-
-    it('restify-GH-719 serve a specific static file', function (done) {
-        // serve the same default file .tmp/public/index.json
-        // but get it from opts.file
-        serveStaticTest(done, false, '.tmp', null, true);
-    });
-
 });
