@@ -91,7 +91,7 @@ describe('strictQueryParams', function () {
                 assert.equal(typeof err, 'object');
                 assert.equal(res.statusCode, 400);
                 assert.deepEqual(JSON.parse(res.body), {
-                    code: 'BadRequestError',
+                    code: 'BadRequest',
                     message: MESSAGE
                 });
                 done();
@@ -119,7 +119,7 @@ describe('strictQueryParams', function () {
                 assert.equal(typeof err, 'object');
                 assert.equal(res.statusCode, 400);
                 assert.deepEqual(JSON.parse(res.body), {
-                    code: 'BadRequestError',
+                    code: 'BadRequest',
                     message: ''
                 });
                 done();
@@ -154,7 +154,7 @@ describe('strictQueryParams', function () {
                 assert.equal(typeof err, 'object');
                 assert.equal(res.statusCode, 400);
                 assert.deepEqual(JSON.parse(res.body), {
-                    code: 'BadRequestError',
+                    code: 'BadRequest',
                     message: MESSAGE
                 });
                 done();
@@ -185,7 +185,7 @@ describe('strictQueryParams', function () {
                 assert.equal(typeof err, 'object');
                 assert.equal(res.statusCode, 400);
                 assert.deepEqual(JSON.parse(res.body), {
-                    code: 'BadRequestError',
+                    code: 'BadRequest',
                     message: MESSAGE
                 });
                 done();
