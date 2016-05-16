@@ -16,7 +16,7 @@ var CLIENT;
 var PORT;
 var MESSAGE = 'Malformed request syntax';
 
-describe('request url validator', function () {
+describe('strictQueryParams', function () {
 
     beforeEach(function (done) {
         SERVER = restify.createServer({
@@ -71,7 +71,7 @@ describe('request url validator', function () {
     it('should respond 400 to malformed query param', function (done) {
 
 
-        SERVER.pre(plugins.pre.reqUrlValidator({
+        SERVER.pre(plugins.pre.strictQueryParams({
             message: MESSAGE
         }));
 
@@ -101,7 +101,7 @@ describe('request url validator', function () {
     it('should respond 400 without message opt', function (done) {
 
 
-        SERVER.pre(plugins.pre.reqUrlValidator());
+        SERVER.pre(plugins.pre.strictQueryParams());
 
         SERVER.use(plugins.queryParser({
             mapParams: true,
@@ -129,7 +129,7 @@ describe('request url validator', function () {
     it('should respond 400 to query param with amp and plus', function (done) {
 
 
-        SERVER.pre(plugins.pre.reqUrlValidator({
+        SERVER.pre(plugins.pre.strictQueryParams({
             message: MESSAGE
         }));
 
@@ -164,7 +164,7 @@ describe('request url validator', function () {
     it('should respond to invalid query param value with 400', function (done) {
 
 
-        SERVER.pre(plugins.pre.reqUrlValidator({
+        SERVER.pre(plugins.pre.strictQueryParams({
             message: MESSAGE
         }));
 
@@ -195,7 +195,7 @@ describe('request url validator', function () {
     it('should respond to valid query param value with 200', function (done) {
 
 
-        SERVER.pre(plugins.pre.reqUrlValidator({
+        SERVER.pre(plugins.pre.strictQueryParams({
             message: MESSAGE
         }));
 
@@ -226,7 +226,7 @@ describe('request url validator', function () {
     it('should respond 200 with scaped amp and \s', function (done) {
 
 
-        SERVER.pre(plugins.pre.reqUrlValidator({
+        SERVER.pre(plugins.pre.strictQueryParams({
             message: MESSAGE
         }));
 
