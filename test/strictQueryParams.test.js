@@ -41,7 +41,7 @@ describe('strictQueryParams', function () {
         SERVER.close(done);
     });
 
-    it('should respond 200 without validation plugin', function (done) {
+    it('should respond 200 without plugin', function (done) {
 
         SERVER.use(plugins.queryParser({
             mapParams: true,
@@ -68,7 +68,7 @@ describe('strictQueryParams', function () {
     });
 
 
-    it('should respond 400 to malformed query param', function (done) {
+    it('should respond 400 to non-strict key/val query param', function (done) {
 
 
         SERVER.pre(plugins.pre.strictQueryParams({
@@ -120,7 +120,7 @@ describe('strictQueryParams', function () {
                 assert.equal(res.statusCode, 400);
                 assert.deepEqual(JSON.parse(res.body), {
                     code: 'BadRequest',
-                    message: ''
+                    message: 'url query params does not meet strict format'
                 });
                 done();
             });
@@ -161,7 +161,7 @@ describe('strictQueryParams', function () {
             });
     });
 
-    it('should respond to invalid query param value with 400', function (done) {
+    it('should respond to non-strict key/val query param value with 400', function (done) {
 
 
         SERVER.pre(plugins.pre.strictQueryParams({
