@@ -120,7 +120,7 @@ describe('strictQueryParams', function () {
                 assert.equal(res.statusCode, 400);
                 assert.deepEqual(JSON.parse(res.body), {
                     code: 'BadRequest',
-                    message: 'url query params does not meet strict format'
+                    message: 'Url query params does not meet strict format'
                 });
                 done();
             });
