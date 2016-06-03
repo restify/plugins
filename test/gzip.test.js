@@ -22,7 +22,7 @@ describe('gzip parser', function () {
             log: helper.getLog('server')
         });
 
-        SERVER.listen(PORT, '127.0.0.1', function () {
+        SERVER.listen(0, '127.0.0.1', function () {
             PORT = SERVER.address().port;
             CLIENT = restifyClients.createJsonClient({
                 url: 'http://127.0.0.1:' + PORT,
