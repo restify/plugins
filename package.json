@@ -89,7 +89,7 @@
     "mkdirp": "^0.5.1",
     "mocha": "^2.5.3",
     "nsp": "^2.4.0",
-    "restify": "^4.0.3",
+    "restify": "git+https://git@github.com/restify/node-restify.git#5.x",
     "restify-clients": "^1.1.1",
     "rimraf": "^2.4.3"
   },
