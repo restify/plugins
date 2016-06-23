@@ -100,7 +100,8 @@ describe('static resource plugin', function () {
                     }
 
                     if (testDefault) {
-                        opts.defaultFile = testFileName;
+                        p = '/' + testDir + '/';
+                        opts.default = testFileName;
                         routeName += ' with default';
                     }
                     var re = regex ||
@@ -121,7 +122,61 @@ describe('static resource plugin', function () {
                 });
             });
         });
+    }
 
+    function testNoAppendPath(done, testDefault, tmpDir, regex, staticFile) {
+        var staticContent = '{"content": "abcdefg"}';
+        var staticObj = JSON.parse(staticContent);
+        var testDir = 'public';
+        var testFileName = 'index.json';
+        var routeName = 'GET wildcard';
+        var tmpPath = path.join(__dirname, '../', tmpDir);
+
+        mkdirp(tmpPath, function (err) {
+            assert.ifError(err);
+            DIRS_TO_DELETE.push(tmpPath);
+            var folderPath = path.join(tmpPath, testDir);
+
+            mkdirp(folderPath, function (err2) {
+                assert.ifError(err2);
+
+                DIRS_TO_DELETE.push(folderPath);
+                var file = path.join(folderPath, testFileName);
+
+                fs.writeFile(file, staticContent, function (err3) {
+                    assert.ifError(err3);
+                    FILES_TO_DELETE.push(file);
+                    var p = '/' + testDir + '/' + testFileName;
+                    var opts = { directory: folderPath };
+                    opts.appendRequestPath = false;
+
+                    if (staticFile) {
+                        opts.file = testFileName;
+                    }
+
+                    if (testDefault) {
+                        p = '/' + testDir + '/';
+                        opts.default = testFileName;
+                        routeName += ' with default';
+                    }
+                    var re = regex ||
+                        new RegExp('/' + testDir + '/?.*');
+
+                    SERVER.get({
+                        path: re,
+                        name: routeName
+                    }, plugins.serveStatic(opts));
+
+                    CLIENT.get(p, function (err4, req, res, obj) {
+                        assert.ifError(err4);
+                        assert.equal(res.headers['cache-control'],
+                            'public, max-age=3600');
+                        assert.deepEqual(obj, staticObj);
+                        done();
+                    });
+                });
+            });
+        });
     }
 
     it('static serves static files', function (done) {
@@ -162,4 +217,18 @@ describe('static resource plugin', function () {
         serveStaticTest(done, false, '.tmp', null, true);
     });
 
+    it('static serves static file with appendRequestPath = false',
+        function (done) {
+        testNoAppendPath(done, false, '.tmp');
+    });
+
+    it('static serves default file with appendRequestPath = false',
+        function (done) {
+        testNoAppendPath(done, true, '.tmp');
+    });
+
+    it('restify serve a specific static file with appendRequestPath = false',
+        function (done) {
+        testNoAppendPath(done, false, '.tmp', null, true);
+    });
 });
