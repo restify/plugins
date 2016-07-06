@@ -3,6 +3,7 @@
 // core requires
 var fs = require('fs');
 var path = require('path');
+var net = require('net');
 
 // external requires
 var assert = require('chai').assert;
@@ -230,5 +231,98 @@ describe('static resource plugin', function () {
     it('restify serve a specific static file with appendRequestPath = false',
         function (done) {
         testNoAppendPath(done, false, '.tmp', null, true);
+    });
+
+    // To ensure this will always get properly restored (even in case of a test
+    // failure) we do it here.
+    var originalCreateReadStream = fs.createReadStream;
+    afterEach(function () {
+        fs.createReadStream = originalCreateReadStream;
+    });
+
+    var TMP_PATH = path.join(__dirname, '../', '.tmp');
+    var RAW_REQUEST =
+        'GET /index.html HTTP/1.1\r\n' +
+        'Host: 127.0.0.1:' + PORT + '\r\n' +
+        'User-Agent: curl/7.48.0\r\n' +
+        'Accept: */*\r\n' +
+        '\r\n';
+
+    it('static does not leak the file stream and next() is properly called ' +
+       'when the client disconnects before receiving a reply', function (done) {
+        var streamWasAlreadyCreated = false;
+        var streamWasClosed = false;
+        var socket = new net.Socket();
+
+        fs.createReadStream = function () {
+            // Just in case the code would open more streams in the future.
+            assert.strictEqual(streamWasAlreadyCreated, false);
+            streamWasAlreadyCreated = true;
+
+            var stream = originalCreateReadStream.apply(this, arguments);
+            stream.once('close', function () {
+                streamWasClosed = true;
+            });
+
+            socket.end();
+            return stream;
+        };
+
+        mkdirp(TMP_PATH, function (err) {
+            assert.ifError(err);
+            DIRS_TO_DELETE.push(TMP_PATH);
+            fs.writeFileSync(path.join(TMP_PATH, 'index.html'), 'Hello world!');
+
+            var serve = plugins.serveStatic({
+                directory: TMP_PATH
+            });
+
+            SERVER.get(/.*/, function (req, res, next) {
+                serve(req, res, function (nextRoute) {
+                    assert.strictEqual(streamWasClosed, true);
+                    assert.strictEqual(nextRoute, false);
+                    done();
+                });
+            });
+
+            socket.connect({host: '127.0.0.1', port: PORT}, function () {
+                socket.write(RAW_REQUEST, 'utf-8', function (err2, data) {
+                    assert.ifError(err2);
+                });
+            });
+        });
+    });
+
+    it('static does not open a file stream and next() is properly called ' +
+       'when the client disconnects immediately after sending a request',
+    function (done) {
+        fs.createReadStream = function () {
+            assert(false);
+        };
+
+        mkdirp(TMP_PATH, function (err) {
+            assert.ifError(err);
+            DIRS_TO_DELETE.push(TMP_PATH);
+            fs.writeFileSync(path.join(TMP_PATH, 'index.html'), 'Hello world!');
+
+            var serve = plugins.serveStatic({
+                directory: TMP_PATH
+            });
+
+            SERVER.get(/.*/, function (req, res, next) {
+                serve(req, res, function (nextRoute) {
+                    assert.strictEqual(nextRoute, false);
+                    done();
+                });
+            });
+
+            var socket = new net.Socket();
+            socket.connect({host: '127.0.0.1', port: PORT}, function () {
+                socket.write(RAW_REQUEST, 'utf-8', function (err2, data) {
+                    assert.ifError(err2);
+                    socket.end();
+                });
+            });
+        });
     });
 });
