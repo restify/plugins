@@ -28,7 +28,7 @@ describe('multipart parser', function () {
             next();
         });
 
-        SERVER.listen(PORT, '127.0.0.1', function () {
+        SERVER.listen(0, '127.0.0.1', function () {
             PORT = SERVER.address().port;
             done();
         });
