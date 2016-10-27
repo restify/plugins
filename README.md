@@ -25,6 +25,8 @@ prior to the routing of a request:
 * `sanitizePath()` - cleans up duplicate or trailing / on the URL
 * `userAgent(options)` - used to support edge cases for HEAD requests when using curl
   * `options.userAgentRegExp` {RegExp} regexp to capture curl user-agents
+* `strictQueryParams()` - checks req.urls query params with strict key/val format and rejects non-strict requests with status code 400.
+  * `options.message` {String} response body message string
 
 This module includes the following header parser plugins:
 
