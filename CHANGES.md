@@ -17,6 +17,8 @@
 ### Breaking changes
 - plugins moved into their own repository
 - `sanitizePath` now available only on the `pre` export
+- `allowDots: false` and `plainObjects: false` are new defaults for
+  `queryParser`.
 - `mapParams: false` is now the default setting for both the queryParser and
   bodyParser plugins
 - request expiration plugin now has two options, absolute time and timeout, the

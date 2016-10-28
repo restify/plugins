@@ -50,9 +50,29 @@ This module includes the following data parsing plugins:
     * `options.mapParams` - default false. copies parsed post body values onto req.params
     * `options.overrideParams` - default false. only applies when if mapParams true. when true, will stomp on req.params value when existing value is found.
 * `jsonp()` - parses JSONP callback
-* `queryParser()` - parses URL query paramters
-  * `options.mapParams` - default false. copies parsed post body values onto req.params
-  * `options.overrideParams` - default false. only applies when if mapParams true. when true, will stomp on req.params value when existing value is found.
+* `queryParser()` - Parses URL query paramters into `req.query`. Many options
+  correspond directly to option defined for the underlying
+  [`qs.parse`](https://github.com/ljharb/qs).
+  * `options.mapParams` - Default false. Copies parsed query parameters into
+    `req.params`.
+  * `options.overrideParams` - Default false. Only applies when if mapParams
+    true. When true, will stomp on req.params field when existing value is
+    found.
+  * `options.allowDots` - Default false. Transform `?foo.bar=baz` to a nested
+    object: `{foo: {bar: 'baz'}}`.
+  * `options.arrayLimit` - Default 20. Only transform `?a[$index]=b` to an array
+    if `$index` is less than `arrayLimit`.
+  * `options.depth` - Default 5. The depth limit for parsing nested objects,
+    e.g. `?a[b][c][d][e][f][g][h][i]=j`.
+  * `options.parameterLimit` - Default 1000. Maximum number of query params
+    parsed. Additional params are silently dropped.
+  * `options.parseArrays` - Default true. Whether to parse `?a[]=b&a[1]=c` to an
+    array, e.g. `{a: ['b', 'c']}`.
+  * `options.plainObjects` - Default false. Whether `req.query` is a "plain"
+    object -- does not inherit from `Object`. This can be used to allow query
+    params whose names collide with Object methods, e.g. `?hasOwnProperty=blah`.
+  * `options.strictNullHandling` - Default false. If true, `?a&b=` results in
+    `{a: null, b: ''}`. Otherwise, `{a: '', b: ''}`.
 * `requestLogger(options)` - adds timers for each handler in your request chain
   * `options.properties` {Object} properties to pass to bunyan's `log.child()` method
 
