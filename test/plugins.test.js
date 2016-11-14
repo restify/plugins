@@ -132,4 +132,31 @@ describe('all other plugins', function () {
         });
 
     });
+
+    describe('context', function () {
+        it('set and get request context', function (done) {
+            SERVER.pre(plugins.pre.context());
+
+            var asserted = false;
+            SERVER.get('/context', [
+                function (req, res, next) {
+                    req.set('pink', 'floyd');
+                    return next();
+                },
+                function (req, res, next) {
+                    assert.equal('floyd', req.get('pink'));
+                    asserted = true;
+                    res.send(200);
+                    return next();
+                }
+            ]);
+
+            CLIENT.get('/context', function (err, _, res) {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert.ok(asserted);
+                done();
+            });
+        });
+    });
 });

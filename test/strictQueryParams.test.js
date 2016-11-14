@@ -161,7 +161,8 @@ describe('strictQueryParams', function () {
             });
     });
 
-    it('should respond to non-strict key/val query param value with 400', function (done) {
+    it('should respond to non-strict key/val query param value with 400',
+        function (done) {
 
 
         SERVER.pre(plugins.pre.strictQueryParams({
