@@ -140,7 +140,7 @@ describe('all other plugins', function () {
             var asserted = false;
             var expectedData = {
                 pink: 'floyd'
-            }
+            };
             SERVER.get('/context', [
                 function (req, res, next) {
                     req.set('pink', 'floyd');
