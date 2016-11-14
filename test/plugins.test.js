@@ -162,5 +162,105 @@ describe('all other plugins', function () {
                 done();
             });
         });
+
+        it('should throw if set key is not string', function (done) {
+            SERVER.pre(plugins.pre.context());
+
+            var asserted = false;
+
+            SERVER.get('/context', [
+                function (req, res, next) {
+                    try {
+                        req.set({}, 'floyd');
+                    } catch (e) {
+                        asserted = true;
+                        res.send(200);
+                    }
+                    return next();
+                }
+            ]);
+
+            CLIENT.get('/context', function (err, _, res) {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert.ok(asserted);
+                done();
+            });
+        });
+
+        it('should throw if set key is empty string', function (done) {
+            SERVER.pre(plugins.pre.context());
+
+            var asserted = false;
+
+            SERVER.get('/context', [
+                function (req, res, next) {
+                    try {
+                        req.set('', 'floyd');
+                    } catch (e) {
+                        asserted = true;
+                        res.send(200);
+                    }
+                    return next();
+                }
+            ]);
+
+            CLIENT.get('/context', function (err, _, res) {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert.ok(asserted);
+                done();
+            });
+        });
+
+        it('should throw if get key is not string', function (done) {
+            SERVER.pre(plugins.pre.context());
+
+            var asserted = false;
+
+            SERVER.get('/context', [
+                function (req, res, next) {
+                    try {
+                        req.get({});
+                    } catch (e) {
+                        asserted = true;
+                        res.send(200);
+                    }
+                    return next();
+                }
+            ]);
+
+            CLIENT.get('/context', function (err, _, res) {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert.ok(asserted);
+                done();
+            });
+        });
+
+        it('should throw if get key is empty string', function (done) {
+            SERVER.pre(plugins.pre.context());
+
+            var asserted = false;
+
+            SERVER.get('/context', [
+                function (req, res, next) {
+                    try {
+                        req.get('');
+                    } catch (e) {
+                        asserted = true;
+                        res.send(200);
+                    }
+                    return next();
+                }
+            ]);
+
+            CLIENT.get('/context', function (err, _, res) {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert.ok(asserted);
+                done();
+            });
+        });
     });
 });
