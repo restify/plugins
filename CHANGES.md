@@ -1,3 +1,6 @@
+# 1.2.0
+Add request context plugin.
+
 # 1.0.2
 
 - merges [commit](https://github.com/restify/node-restify/commit/fbd56f5751f82031c8b0e677f0bdd677c7b95892)
