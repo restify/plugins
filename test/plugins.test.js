@@ -138,6 +138,9 @@ describe('all other plugins', function () {
             SERVER.pre(plugins.pre.context());
 
             var asserted = false;
+            var expectedData = {
+                pink: 'floyd'
+            }
             SERVER.get('/context', [
                 function (req, res, next) {
                     req.set('pink', 'floyd');
@@ -145,6 +148,7 @@ describe('all other plugins', function () {
                 },
                 function (req, res, next) {
                     assert.equal('floyd', req.get('pink'));
+                    assert.deepEqual(expectedData, req._getAllContext());
                     asserted = true;
                     res.send(200);
                     return next();
