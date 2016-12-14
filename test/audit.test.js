@@ -25,7 +25,7 @@ describe('audit logger', function () {
             log: helper.getLog('server')
         });
 
-        SERVER.listen(PORT, '127.0.0.1', function () {
+        SERVER.listen(0, '127.0.0.1', function () {
             PORT = SERVER.address().port;
             CLIENT = restifyClients.createJsonClient({
                 url: 'http://127.0.0.1:' + PORT,
@@ -61,25 +61,21 @@ describe('audit logger', function () {
         }));
 
         var self = this;
-        SERVER.get('/foo',
-                   function (req, res, next) {
-                       res.send(200, {testdata : 'foo'});
-                       next();
-                   }
-                  );
-        SERVER.get('/bar',
-                   function (req, res, next) {
-                       res.send(200, {testdata : 'bar'});
-                       next();
-                   }
-                  );
-        SERVER.get('/auditrecords',
-                   function (req, res, next) {
-                       var data = logBuffer.records;
-                       res.send(200, data);
-                       next();
-                   }
-                  );
+        SERVER.get('/foo', function (req, res, next) {
+            res.send(200, {testdata : 'foo'});
+            next();
+        });
+
+        SERVER.get('/bar', function (req, res, next) {
+            res.send(200, {testdata : 'bar'});
+            next();
+        });
+
+        SERVER.get('/auditrecords', function (req, res, next) {
+            var data = logBuffer.records;
+            res.send(200, data);
+            next();
+        });
 
 
         fooRequest = function foo(_, callback) {
@@ -139,25 +135,21 @@ describe('audit logger', function () {
         }));
 
 
-        SERVER.get('/foo',
-                   function (req, res, next) {
-                       res.send(200, {testdata : 'foo'});
-                       next();
-                   }
-                  );
-        SERVER.get('/bar',
-                   function (req, res, next) {
-                       res.send(200, {testdata : 'bar'});
-                       next();
-                   }
-                  );
-        SERVER.get('/auditrecords',
-                   function (req, res, next) {
-                       var data = logBuffer.records;
-                       res.send(200, data);
-                       next();
-                   }
-                  );
+        SERVER.get('/foo', function (req, res, next) {
+            res.send(200, {testdata : 'foo'});
+            next();
+        });
+
+        SERVER.get('/bar', function (req, res, next) {
+            res.send(200, {testdata : 'bar'});
+            next();
+        });
+
+        SERVER.get('/auditrecords', function (req, res, next) {
+            var data = logBuffer.records;
+            res.send(200, data);
+            next();
+        });
 
         collectLog = function () {
             CLIENT.get('/auditrecords', function (err, req, res) {

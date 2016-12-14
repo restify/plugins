@@ -1,10 +1,14 @@
-# 1.1.0
+# 1.3.0
 
 - NEW: unified CORS plugin for both preflight and regular requests
   - allow customization of allowed/exposed headers
   - use matched origin for non-credential requests
   - various new options (see README.md)
 - BREAKING: remove all CORS access-control-* headers from the fullResponse plugin
+
+# 1.2.0
+
+Add request context plugin.
 
 # 1.0.2
 
@@ -25,6 +29,8 @@
 ### Breaking changes
 - plugins moved into their own repository
 - `sanitizePath` now available only on the `pre` export
+- `allowDots: false` and `plainObjects: false` are new defaults for
+  `queryParser`.
 - `mapParams: false` is now the default setting for both the queryParser and
   bodyParser plugins
 - request expiration plugin now has two options, absolute time and timeout, the
