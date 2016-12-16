@@ -40,9 +40,6 @@ This module includes the following header parser plugins:
 
 This module includes the following data parsing plugins:
 
-* `auditLogger(options)` - an audit logger for recording all handled requests
-  * `options.log` {Object} bunyan logger
-  * `options.body` {?}
 * `bodyParser(options)` - parses POST bodies to `req.body`. automatically uses one of the following parsers based on content type:
   * `urlEncodedBodyParser(options)` - parses url encoded form bodies
   * `jsonBodyParser(options)` - parses JSON POST bodies
@@ -105,6 +102,34 @@ The module includes the following response plugins:
   * `options.startHeader` {String} header name for the start time of the request
   * `options.timeoutHeader` {String}  The header name for the time in milliseconds that should ellapse before the request is considered expired.
 
+The module includes the following plugins to be used with restify's after
+event, e.g., `server.on('after', plugins.auditLogger());`:
+
+
+* `auditLogger(options)` - an audit logger for recording all handled requests
+  * `options.log` {Object} bunyan logger
+  * `[options.server]` {Object} restify server. if passed in, causes server to
+     emit 'auditlog' event after audit logs are flushed
+  * `[options.logBuffer]` {Object} optional ringbuffer which is written to if
+     passed in
+  * `[options.printLog]` {Boolean} when true, prints audit logs. default true.
+* `metrics(callback)` - a metrics plugin which will invoke callback with the
+  the following parameters:
+  * `err` {Object} an error if the request had an error
+  * `metrics` {Object} - metrics about the request
+  * `metrics.statusCode` {Number} status code of the response. can be undefined
+    in the case of an uncaughtException
+  * `metrics.method` {String} http request verb
+  * `metrics.latency` {Number} request latency
+  * `metrics.path` {String} req.path() value
+  * `metrics.connectionState` {String} can be either 'close', 'aborted', or
+    undefined. If this value is set, err will be a corresponding
+    `RequestCloseError` or `RequestAbortedError`. If connectionState is either
+    'close' or 'aborted', then the statusCode is not applicable since the
+    connection was severed before a response was written.
+  * `req` {Object} the request obj
+  * `res` {Object} the response obj
+  * `route` {Object} the route obj that serviced the request
 
 
 ## Contributing
