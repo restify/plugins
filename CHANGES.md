@@ -1,5 +1,13 @@
+# 1.4.0
+- #79: audit log now uses `req.connectionState()` instead of `req.clientClosed`
+  field. Compatible only with restify@5.0.0-beta-3.0 or newer.
+- #78: new metrics plugin for use with `server.on('after',...` event.
+
+# 1.3.0
+- Add assertions to context plugin.
+
 # 1.2.0
-Add request context plugin.
+- #73 Add request context plugin.
 
 # 1.0.2
 
