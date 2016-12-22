@@ -1,3 +1,7 @@
+# 1.4.1
+- #82: fix bug in context plugin where context bucket was shared between
+  requests.
+
 # 1.4.0
 - #79: audit log now uses `req.connectionState()` instead of `req.clientClosed`
   field. Compatible only with restify@5.0.0-beta-3.0 or newer.
