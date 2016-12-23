@@ -74,6 +74,13 @@ This module includes the following data parsing plugins:
 * `requestLogger(options)` - adds timers for each handler in your request chain
   * `options.properties` {Object} properties to pass to bunyan's `log.child()` method
 
+The module includes the following request plugins:
+
+* `reqIdHeaders(options)` - a plugin that lets you use incoming request header
+  values to set the request id (5.x compatible only)
+  * `options.headers` {Array} an array of header names to use. lookup
+    precedence is left to right (lowest index first)
+
 The module includes the following response plugins:
 
 * `dateParser(delta)` - expires requests based on current time + delta
@@ -105,7 +112,6 @@ The module includes the following response plugins:
 The module includes the following plugins to be used with restify's after
 event, e.g., `server.on('after', plugins.auditLogger());`:
 
-
 * `auditLogger(options)` - an audit logger for recording all handled requests
   * `options.log` {Object} bunyan logger
   * `[options.server]` {Object} restify server. if passed in, causes server to
@@ -114,7 +120,7 @@ event, e.g., `server.on('after', plugins.auditLogger());`:
      passed in
   * `[options.printLog]` {Boolean} when true, prints audit logs. default true.
 * `metrics(callback)` - a metrics plugin which will invoke callback with the
-  the following parameters:
+  the following parameters (5.x compatible only):
   * `err` {Object} an error if the request had an error
   * `metrics` {Object} - metrics about the request
   * `metrics.statusCode` {Number} status code of the response. can be undefined
