@@ -46,7 +46,7 @@
     "Jorge Serrano"
   ],
   "name": "restify-plugins",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "A collection of core restify plugins",
   "main": "lib/index.js",
   "homepage": "https://github.com/restify/plugins",

@@ -1,3 +1,8 @@
+# 1.5.0
+
+- #81: move `reqIdHeaders` option from restify 5.x core into the plugin repo.
+  Requires 5.x restify to work properly.
+
 # 1.4.1
 - #82: fix bug in context plugin where context bucket was shared between
   requests.
