@@ -1,3 +1,8 @@
+# 1.5.1
+
+- FIX: staticServe plugin should not assume `req.connectionState()` method since
+  it's 5.x restify only.
+
 # 1.5.0
 
 - #81: move `reqIdHeaders` option from restify 5.x core into the plugin repo.
