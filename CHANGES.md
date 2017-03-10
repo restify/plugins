@@ -1,3 +1,10 @@
+# 2.0.0
+- Breaking: Audit logger plugin no longer accepts a `opts.logBuffer` object.
+- Breaking: Audit logger plugin requires a `opts.event` string which identifies
+  the restify event the logger is listening on. It must be one of `pre`,`routed`,
+  or `after`
+- Breaking: Audit logger plugin no longer emits an `auditLog` event, but
+  instead emits an `audit` event.
 # 1.5.1
 
 - FIX: staticServe plugin should not assume `req.connectionState()` method since

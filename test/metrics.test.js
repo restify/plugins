@@ -57,7 +57,7 @@ describe('request metrics plugin', function () {
             assert.equal(metrics.path, '/foo');
             assert.equal(metrics.connectionState, undefined);
             assert.equal(metrics.method, 'GET');
-            assert.isNumber(metrics.unfinishedRequests);
+            assert.isNumber(metrics.inflightRequests);
 
             assert.isObject(req, 'req');
             assert.isObject(res, 'res');
@@ -97,7 +97,7 @@ describe('request metrics plugin', function () {
             assert.equal(metrics.path, '/foo');
             assert.equal(metrics.method, 'GET');
             assert.equal(metrics.connectionState, 'close');
-            assert.isNumber(metrics.unfinishedRequests);
+            assert.isNumber(metrics.inflightRequests);
             return done();
         }));
 
@@ -134,7 +134,7 @@ describe('request metrics plugin', function () {
             assert.equal(metrics.path, '/foo');
             assert.equal(metrics.method, 'GET');
             assert.equal(metrics.connectionState, 'aborted');
-            assert.isNumber(metrics.unfinishedRequests);
+            assert.isNumber(metrics.inflightRequests);
         }));
 
         SERVER.get('/foo', function (req, res, next) {
@@ -171,7 +171,7 @@ describe('request metrics plugin', function () {
             assert.equal(metrics.path, '/foo');
             assert.equal(metrics.method, 'GET');
             assert.equal(metrics.connectionState, undefined);
-            assert.isNumber(metrics.unfinishedRequests);
+            assert.isNumber(metrics.inflightRequests);
         }));
 
         SERVER.get('/foo', function (req, res, next) {
