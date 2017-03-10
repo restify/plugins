@@ -5,6 +5,8 @@
   or `after`
 - Breaking: Audit logger plugin no longer emits an `auditLog` event, but
   instead emits an `audit` event.
+- Breaking: Metrics plugin now returns `inflightRequests` instead of
+  `unfinishedRequests`
 # 1.5.1
 
 - FIX: staticServe plugin should not assume `req.connectionState()` method since
