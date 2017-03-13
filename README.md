@@ -113,11 +113,11 @@ The module includes the following plugins to be used with restify's `pre`, `rout
 event, e.g., `server.on('after', plugins.auditLogger());`:
 
 * `auditLogger(options)` - an audit logger for recording all handled requests
+  * `options.event` {String} The name of the event, one of `pre`, `routed`, or `after`
   * `options.log` {Object} bunyan logger
   * `[options.server]` {Object} restify server. if passed in, causes server to
      emit 'auditlog' event after audit logs are flushed
   * `[options.printLog]` {Boolean} when true, prints audit logs. defaults to true.
-  * `options.event` {String} The name of the event, one of `pre`, `routed`, or `after`
 
 The module includes the following plugins to be used with restify's `after`
 event, e.g., `server.on('after', plugins.metrics());`:
