@@ -55,8 +55,48 @@ describe('fielded text parser', function () {
         SERVER.close(done);
     });
 
-
     it('should parse CSV body', function (done) {
+        var options = {
+            path: '/data',
+            headers: {
+                'Content-Type': 'text/csv'
+            }
+        };
+
+        SERVER.post('/data', function respond(req, res, next) {
+            res.send({
+                status: 'okay',
+                parsedReq: req.body
+            });
+            return next();
+        });
+
+        CLIENT.post(options, function (err, req) {
+            assert.ifError(err);
+            req.on('result', function (errReq, res) {
+                assert.ifError(errReq);
+                res.body = '';
+                res.setEncoding('utf8');
+                res.on('data', function (chunk) {
+                    res.body += chunk;
+                });
+                res.on('end', function () {
+                    res.body = JSON.parse(res.body);
+                    var parsedReqStr = JSON.stringify(res.body.parsedReq);
+                    var objectStr = JSON.stringify(OBJECT_CSV);
+                    assert.equal(parsedReqStr, objectStr);
+                    done();
+                });
+            });
+            req.write(DATA_CSV);
+            req.end();
+        });
+    });
+
+    it('should parse CSV body even if bodyparser declared twice',
+        function (done)
+    {
+        SERVER.use(plugins.bodyParser());
         var options = {
             path: '/data',
             headers: {
@@ -161,6 +201,5 @@ describe('fielded text parser', function () {
             req.end();
         });
     });
-
 });
 

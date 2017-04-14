@@ -44,7 +44,7 @@ describe('request metrics plugin', function () {
     });
 
 
-    it('should return metrics for a given request', function (done) {
+    it.only('should return metrics for a given request', function (done) {
 
         SERVER.on('after', plugins.metrics({
             server: SERVER
