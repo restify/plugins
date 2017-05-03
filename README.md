@@ -130,6 +130,8 @@ event, e.g., `server.on('after', plugins.metrics());`:
   * `metrics.method` {String} http request verb
   * `metrics.latency` {Number} request latency
   * `metrics.path` {String} req.path() value
+  * `metrics.inflightRequests` {Number} Number of inflight requests pending in restify.
+  * `metrics.unifinishedRequests` {Number} Same as `inflightRequests`
   * `metrics.connectionState` {String} can be either 'close', 'aborted', or
     undefined. If this value is set, err will be a corresponding
     `RequestCloseError` or `RequestAbortedError`. If connectionState is either
