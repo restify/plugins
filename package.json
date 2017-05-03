@@ -83,8 +83,8 @@
   },
   "devDependencies": {
     "chai": "^3.4.1",
+    "eslint": "^3.19.0",
     "coveralls": "^2.13.0",
-    "eslint": "^3.0.1",
     "istanbul": "^0.4.1",
     "jscs": "^3.0.0",
     "mkdirp": "^0.5.1",
