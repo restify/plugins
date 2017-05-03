@@ -97,7 +97,7 @@
   },
   "dependencies": {
     "assert-plus": "^1.0.0",
-    "bunyan": "^1.8.0",
+    "bunyan": "^1.8.10",
     "csv": "^1.1.0",
     "escape-regexp-component": "^1.0.2",
     "formidable": "^1.0.17",
