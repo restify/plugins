@@ -6,6 +6,7 @@ var PassThrough = require('stream').PassThrough;
 // external requires
 var assert = require('chai').assert;
 var bunyan = require('bunyan');
+var lodash = require('lodash');
 var restify = require('restify');
 var restifyClients = require('restify-clients');
 
@@ -18,6 +19,7 @@ var vasync = require('vasync');
 var SERVER;
 var CLIENT;
 var PORT;
+
 
 describe('audit logger', function () {
 
@@ -45,6 +47,7 @@ describe('audit logger', function () {
     });
 
     it('audit logger should print log by default', function (done) {
+
         var logBuffer = new bunyan.RingBuffer({
             limit: 1000
         });
@@ -73,7 +76,11 @@ describe('audit logger', function () {
         });
 
         SERVER.get('/auditrecords', function (req, res, next) {
-            var data = logBuffer.records;
+            // strip log records of req/res as they will cause
+            // serialization issues.
+            var data = logBuffer.records.map(function (record) {
+                return lodash.omit(record, 'req', 'res');
+            }, []);
             res.send(200, data);
             next();
         });
@@ -89,6 +96,7 @@ describe('audit logger', function () {
                 done();
             });
         };
+
         vasync.forEachParallel({
             func: function clientRequest(urlPath, callback) {
                 CLIENT.get(urlPath, function (err, req, res) {
@@ -103,6 +111,7 @@ describe('audit logger', function () {
             collectLog();
         });
     });
+
 
     it('test audit logger emit', function (done) {
         SERVER.once('after', plugins.auditLogger({
@@ -138,6 +147,7 @@ describe('audit logger', function () {
             assert.ifError(err);
         });
     });
+
 
     it('should log handler timers', function (done) {
         // Dirty hack to capture the log record using a ring buffer.

@@ -24,11 +24,6 @@ describe('accept parser', function () {
 
         SERVER.use(plugins.pre.context());
 
-        SERVER.get('/', function respond(req, res, next) {
-            res.send();
-            next();
-        });
-
         SERVER.listen(0, '127.0.0.1', function () {
             PORT = SERVER.address().port;
             CLIENT = restifyClients.createJsonClient({
@@ -85,13 +80,14 @@ describe('accept parser', function () {
 
     it('should not share context', function (done) {
 
-        SERVER.get('/', function one(req, res, next) {
+        SERVER.get('/1', function one(req, res, next) {
             // ensure we don't get context from previous request
             assert.equal(req.get('foo', null));
+            res.end();
             return next();
         });
 
-        CLIENT.get('/', function (err, _, res) {
+        CLIENT.get('/1', function (err, _, res) {
             assert.ifError(err);
             assert.equal(res.statusCode, 200);
             return done();
