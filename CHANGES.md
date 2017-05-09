@@ -1,3 +1,37 @@
+# 2.0.0
+- Breaking: Audit logger plugin no longer accepts a `opts.logBuffer` object.
+- Breaking: Audit logger plugin requires a `opts.event` string which identifies
+  the restify event the logger is listening on. It must be one of `pre`,`routed`,
+  or `after`
+- Breaking: Audit logger plugin no longer emits an `auditLog` event, but
+  instead emits an `audit` event.
+- Breaking: Metrics plugin now returns `inflightRequests` instead of
+  `unfinishedRequests`
+# 1.5.1
+
+- FIX: staticServe plugin should not assume `req.connectionState()` method since
+  it's 5.x restify only.
+
+# 1.5.0
+
+- #81: move `reqIdHeaders` option from restify 5.x core into the plugin repo.
+  Requires 5.x restify to work properly.
+
+# 1.4.1
+- #82: fix bug in context plugin where context bucket was shared between
+  requests.
+
+# 1.4.0
+- #79: audit log now uses `req.connectionState()` instead of `req.clientClosed`
+  field. Compatible only with restify@5.0.0-beta-3.0 or newer.
+- #78: new metrics plugin for use with `server.on('after',...` event.
+
+# 1.3.0
+- Add assertions to context plugin.
+
+# 1.2.0
+- #73 Add request context plugin.
+
 # 1.0.2
 
 - merges [commit](https://github.com/restify/node-restify/commit/fbd56f5751f82031c8b0e677f0bdd677c7b95892)

@@ -1,11 +1,14 @@
 'use strict';
 
+// runtime modules
+var PassThrough = require('stream').PassThrough;
+
 // external requires
 var assert = require('chai').assert;
 var bunyan = require('bunyan');
+var lodash = require('lodash');
 var restify = require('restify');
 var restifyClients = require('restify-clients');
-//var util = require('util');
 
 // local files
 var helper = require('./lib/helper');
@@ -16,6 +19,7 @@ var vasync = require('vasync');
 var SERVER;
 var CLIENT;
 var PORT;
+
 
 describe('audit logger', function () {
 
@@ -42,82 +46,8 @@ describe('audit logger', function () {
         SERVER.close(done);
     });
 
-    it('should buffer audit logger', function (done) {
-        var logBuffer = new bunyan.RingBuffer({
-            limit: 1000
-        });
-        var fooRequest, barRequest, collectLog;
-        SERVER.on('after', plugins.auditLogger({
-            log: bunyan.createLogger({
-                name: 'audit',
-                streams: [{
-                    level: 'info',
-                    stream: process.stdout
-                }]
-            }),
-            server: SERVER,
-            logMetrics : logBuffer,
-            printLog : false
-        }));
-
-        var self = this;
-        SERVER.get('/foo', function (req, res, next) {
-            res.send(200, {testdata : 'foo'});
-            next();
-        });
-
-        SERVER.get('/bar', function (req, res, next) {
-            res.send(200, {testdata : 'bar'});
-            next();
-        });
-
-        SERVER.get('/auditrecords', function (req, res, next) {
-            var data = logBuffer.records;
-            res.send(200, data);
-            next();
-        });
-
-
-        fooRequest = function foo(_, callback) {
-            CLIENT.get('/foo', function (err, req, res) {
-                assert.ifError(err);
-                assert.equal(JSON.parse(res.body).testdata, 'foo');
-                return callback(err, true);
-            });
-        };
-
-        barRequest = function bar(_, callback) {
-            CLIENT.get('/bar', function (err, req, res) {
-                assert.ifError(err);
-                assert.equal(JSON.parse(res.body).testdata, 'bar');
-                return callback(err, res.body);
-            });
-        };
-        collectLog = function log(_, callback) {
-            CLIENT.get('/auditrecords', function (err, req, res) {
-                assert.ifError(err);
-                var data = JSON.parse(res.body);
-                assert.ok(data);
-                data.forEach(function (d) {
-                    assert.isNumber(d.latency);
-                });
-                return callback(err, true);
-            });
-        };
-        vasync.pipeline({
-            funcs: [
-                fooRequest,
-                barRequest,
-                collectLog
-            ],
-            args: self
-        }, function (err, results) {
-            assert.ifError(err);
-            //console.log('results: %s', util.inspect(results, null, 3));
-            done();
-        });
-    });
     it('audit logger should print log by default', function (done) {
+
         var logBuffer = new bunyan.RingBuffer({
             limit: 1000
         });
@@ -131,7 +61,7 @@ describe('audit logger', function () {
                 }]
             }),
             server: SERVER,
-            logMetrics : logBuffer
+            event: 'after'
         }));
 
 
@@ -146,7 +76,11 @@ describe('audit logger', function () {
         });
 
         SERVER.get('/auditrecords', function (req, res, next) {
-            var data = logBuffer.records;
+            // strip log records of req/res as they will cause
+            // serialization issues.
+            var data = logBuffer.records.map(function (record) {
+                return lodash.omit(record, 'req', 'res');
+            }, []);
             res.send(200, data);
             next();
         });
@@ -162,6 +96,7 @@ describe('audit logger', function () {
                 done();
             });
         };
+
         vasync.forEachParallel({
             func: function clientRequest(urlPath, callback) {
                 CLIENT.get(urlPath, function (err, req, res) {
@@ -173,12 +108,13 @@ describe('audit logger', function () {
             inputs: ['/foo', '/bar']
         }, function (err, results) {
             assert.ifError(err);
-            //console.log('results: %s', util.inspect(results, null, 2));
             collectLog();
         });
     });
+
+
     it('test audit logger emit', function (done) {
-        var auditLoggerObj = plugins.auditLogger({
+        SERVER.once('after', plugins.auditLogger({
             log: bunyan.createLogger({
                 name: 'audit',
                 streams: [{
@@ -186,11 +122,11 @@ describe('audit logger', function () {
                     stream: process.stdout
                 }]
             }),
-            server: SERVER
-        });
+            server: SERVER,
+            event: 'after'
+        }));
 
-        SERVER.on('after', auditLoggerObj);
-        SERVER.on('auditlog', function (data) {
+        SERVER.once('audit', function (data) {
             assert.ok(data);
             assert.ok(data.req_id);
             assert.equal(data.req.url, '/audit',
@@ -198,6 +134,7 @@ describe('audit logger', function () {
             assert.isNumber(data.latency);
             done();
         });
+
         SERVER.get('/audit', [
             plugins.queryParser(),
             function (req, res, next) {
@@ -205,12 +142,13 @@ describe('audit logger', function () {
                 next();
             }
         ]);
+
         CLIENT.get('/audit', function (err, req, res) {
             assert.ifError(err);
         });
-
-
     });
+
+
     it('should log handler timers', function (done) {
         // Dirty hack to capture the log record using a ring buffer.
         var ringbuffer = new bunyan.RingBuffer({ limit: 1 });
@@ -223,7 +161,8 @@ describe('audit logger', function () {
                     type: 'raw',
                     stream: ringbuffer
                 }]
-            })
+            }),
+            event: 'after'
         }));
 
         SERVER.get('/audit', function aTestHandler(req, res, next) {
@@ -288,7 +227,8 @@ describe('audit logger', function () {
                     type: 'raw',
                     stream: ringbuffer
                 }]
-            })
+            }),
+            event: 'after'
         }));
 
         SERVER.get('/audit', function (req, res, next) {
@@ -351,7 +291,8 @@ describe('audit logger', function () {
                     type: 'raw',
                     stream: ringbuffer
                 }]
-            })
+            }),
+            event: 'after'
         }));
 
         SERVER.get('/audit', function (req, res, next) {
@@ -387,7 +328,8 @@ describe('audit logger', function () {
                     type: 'raw',
                     stream: ringbuffer
                 }]
-            })
+            }),
+            event: 'after'
         }));
 
         SERVER.get('/audit', [
@@ -415,4 +357,77 @@ describe('audit logger', function () {
         });
     });
 
+    it('should work with pre events', function (done) {
+
+        var ptStream = new PassThrough();
+
+        SERVER.once('pre', plugins.auditLogger({
+            log: bunyan.createLogger({
+                name: 'audit',
+                streams:[ {
+                    level: 'info',
+                    stream: ptStream
+                }]
+            }),
+            event: 'pre'
+        }));
+
+        SERVER.get('/audit', [
+            plugins.queryParser(),
+            function (req, res, next) {
+                res.send();
+                next();
+            }
+        ]);
+
+        ptStream.on('data', function (data) {
+            var log = JSON.parse(data);
+            assert.equal('pre', log.component);
+            assert.ok(log.req_id);
+            assert.ok(log.req);
+            assert.ok(log.res);
+        });
+
+        CLIENT.get('/audit?a=1&b=2', function (err, req, res) {
+            assert.ifError(err);
+            done();
+        });
+    });
+
+    it('should work with routed events', function (done) {
+
+        var ptStream = new PassThrough();
+
+        SERVER.once('routed', plugins.auditLogger({
+            log: bunyan.createLogger({
+                name: 'audit',
+                streams:[ {
+                    level: 'info',
+                    stream: ptStream
+                }]
+            }),
+            event: 'routed'
+        }));
+
+        SERVER.get('/audit', [
+            plugins.queryParser(),
+            function (req, res, next) {
+                res.send();
+                next();
+            }
+        ]);
+
+        ptStream.on('data', function (data) {
+            var log = JSON.parse(data);
+            assert.equal('routed', log.component);
+            assert.ok(log.req_id);
+            assert.ok(log.req);
+            assert.ok(log.res);
+        });
+
+        CLIENT.get('/audit?a=1&b=2', function (err, req, res) {
+            assert.ifError(err);
+            done();
+        });
+    });
 });
