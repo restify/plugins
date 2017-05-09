@@ -98,6 +98,7 @@ describe('request metrics plugin', function () {
             assert.equal(metrics.method, 'GET');
             assert.equal(metrics.connectionState, 'close');
             assert.isNumber(metrics.unfinishedRequests);
+            assert.isNumber(metrics.inflightRequests);
             return done();
         }));
 
