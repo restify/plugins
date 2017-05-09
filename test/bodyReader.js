@@ -70,7 +70,7 @@ describe('body reader', function () {
                 url: 'http://127.0.0.1:' + PORT,
                 retry: false,
                 headers: {
-                  'content-encoding': 'unsupported'
+                    'content-encoding': 'unsupported'
                 }
             });
 
@@ -83,6 +83,7 @@ describe('body reader', function () {
             CLIENT.post('/compressed', {
                 apple: 'red'
             }, function (err, _, res) {
+                assert.isOk(err, 'should fail');
                 assert.equal(res.statusCode, 415);
                 assert.equal(res.headers['accept-encoding'], 'gzip');
                 done();
