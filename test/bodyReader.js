@@ -41,7 +41,7 @@ describe('body reader', function () {
 
         it('should parse gzip encoded content', function (done) {
             SERVER.use(plugins.bodyParser());
-            
+
             CLIENT = restifyClients.createJsonClient({
                 url: 'http://127.0.0.1:' + PORT,
                 retry: false,
@@ -91,7 +91,7 @@ describe('body reader', function () {
 
         it('should parse unencoded content', function (done) {
             SERVER.use(plugins.bodyParser());
-            
+
             CLIENT = restifyClients.createJsonClient({
                 url: 'http://127.0.0.1:' + PORT,
                 retry: false
