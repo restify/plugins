@@ -65,7 +65,6 @@
     "prehandlers",
     "queryparser",
     "bodyparser",
-    "cors",
     "accept",
     "audit",
     "authorization",
