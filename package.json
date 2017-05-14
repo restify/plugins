@@ -88,7 +88,7 @@
     "jscs": "^3.0.0",
     "lodash": "^4.17.4",
     "mkdirp": "^0.5.1",
-    "mocha": "^3.2.0",
+    "mocha": "^3.4.0",
     "nsp": "^2.4.0",
     "restify": "git+https://git@github.com/restify/node-restify.git#5.x",
     "restify-clients": "^1.1.1",
