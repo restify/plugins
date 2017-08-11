@@ -1,3 +1,11 @@
+# Deprecated!
+
+This repo is being kept for historical purposes and may be deleted in the future. To use the restify plugins, please use:
+
+```js
+require('restify').plugins
+```
+
 # restify-plugins
 
 [![NPM Version](https://img.shields.io/npm/v/restify-plugins.svg)](https://npmjs.org/package/restify-plugins)
